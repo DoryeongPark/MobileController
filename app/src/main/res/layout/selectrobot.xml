@@ -96,11 +96,77 @@
             android:weightSum="6"
             android:gravity="center_horizontal"
             android:orientation="horizontal">
-            <View
+            <LinearLayout
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight="5"
-                android:background="@drawable/roundshape"/>
+                android:background="@drawable/roundshape"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0px"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="0px"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical|right"
+                        android:textColor="#000000"
+                        android:textSize="7pt"
+                        android:text="Robot Name"/>
+                    <TextView
+                        android:layout_width="0px"
+                        android:layout_height="match_parent"
+                        android:layout_weight="2"
+                        android:gravity="center_vertical"
+                        android:textColor="#000000"
+                        android:textSize="7pt"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0px"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="0px"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical|right"
+                        android:textColor="#000000"
+                        android:textSize="7pt"
+                        android:text="Master URL"/>
+                    <TextView
+                        android:layout_width="0px"
+                        android:layout_height="match_parent"
+                        android:layout_weight="2"
+                        android:gravity="center_vertical"
+                        android:textColor="#000000"
+                        android:textSize="7pt"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0px"
+                    android:layout_weight="3"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="0px"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical|right"
+                        android:textColor="#000000"
+                        android:textSize="7pt"
+                        android:text="Sensor Info"/>
+                    <TextView
+                        android:layout_width="0px"
+                        android:layout_height="match_parent"
+                        android:layout_weight="2"
+                        android:gravity="center_vertical"
+                        android:textColor="#000000"
+                        android:textSize="7pt"/>
+                </LinearLayout>
+
+            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>
@@ -118,6 +184,7 @@
         android:paddingBottom="5dp"
         android:paddingTop="5dp">
         <TextView
+            android:id="@+id/btnConnect"
             android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="6"

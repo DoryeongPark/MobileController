@@ -1,6 +1,7 @@
 package com.wonikrobotics.mobilecontroller;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
@@ -8,6 +9,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.wonikrobotics.mobilecontroller.database.DataBases;
 import com.wonikrobotics.mobilecontroller.database.DbOpenHelper;
@@ -19,25 +22,45 @@ import java.util.ArrayList;
  * Created by Notebook on 2016-07-26.
  */
 public class SelectRobot extends Activity {
-    ListView availableRobotList;
-    ArrayList<RobotInformation> robotList;
-    DbOpenHelper mDbOpenHelper;
-    AvailableRobotListAdapter robotListAdapter;
+    private ListView availableRobotList;
+    private ArrayList<RobotInformation> robotList;
+    private DbOpenHelper mDbOpenHelper;
+    private AvailableRobotListAdapter robotListAdapter;
+    private TextView btnConnect;
+    private int selectedRobotPosition = -1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.selectrobot);
+        btnConnect = (TextView)findViewById(R.id.btnConnect);
         availableRobotList = (ListView)findViewById(R.id.availablerobotlist);
         availableRobotList.setOnItemClickListener(robotListListener);
-        dataLoad();
+        btnConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                if(selectedRobotPosition != -1 && robotList.get(selectedRobotPosition).getIdx() != -1) {
+//                    RobotInformation selected = robotList.get(selectedRobotPosition);
+                    Intent controlActivity = new Intent(SelectRobot.this, RobotController.class);
+//                    controlActivity.putExtra("NAME", selected.getRobotName());
+//                    controlActivity.putExtra("URL", selected.getUri_str());
+                    startActivity(controlActivity);
+//                }else{
+//                    Toast.makeText(SelectRobot.this,"Please select the robot",Toast.LENGTH_SHORT).show();
+//                }
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        userOptionDataLoad();
+        robotListDataLoad();
     }
+    private void userOptionDataLoad(){
 
-    public void dataLoad(){
+    }
+    private void robotListDataLoad(){
         if(robotList == null){
             robotList = new ArrayList<RobotInformation>();
         }
@@ -68,12 +91,11 @@ public class SelectRobot extends Activity {
     ListView.OnItemClickListener robotListListener = new ListView.OnItemClickListener(){
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-//            if(list_data.get(position).getMasterUri()!=null){
+            if(robotList.get(position).getMasterUri()!=null){
 //                robot_name.setText(list_data.get(position).getRobotName());
 //                robot_uri.setText(list_data.get(position).getUri_str());
-//                list_sel_position = list_data.get(position).getIdx();
-//                list_item_position = position;
-//            }
+                selectedRobotPosition = position;
+            }
         }
     };
 }

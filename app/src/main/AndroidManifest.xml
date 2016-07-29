@@ -21,7 +21,13 @@
         </activity>
         <activity
             android:name=".SelectRobot"
-            android:screenOrientation="sensorPortrait"></activity>
+            android:screenOrientation="sensorPortrait">
+
+        </activity>
+        <activity
+            android:name=".RobotController">
+
+        </activity>
     </application>
 
 </manifest>

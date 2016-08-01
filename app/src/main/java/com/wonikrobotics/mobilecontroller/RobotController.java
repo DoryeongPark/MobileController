@@ -1,9 +1,11 @@
 package com.wonikrobotics.mobilecontroller;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -11,14 +13,19 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.google.common.base.Preconditions;
 import com.wonikrobotics.controller.ControlLever;
 import com.wonikrobotics.controller.ControlWheel;
+import com.wonikrobotics.controller.Joystick;
+import com.wonikrobotics.ros.CustomRosActivity;
 import com.wonikrobotics.views.Velocity_Display;
+
+import org.ros.node.NodeMainExecutor;
 
 /**
  * Created by Notebook on 2016-07-28.
  */
-public class RobotController extends Activity {
+public class RobotController extends CustomRosActivity {
    /**  define layout display mode **/
     static final int CONTROLLER_VERTICAL_RTHETA = 1;
     static final int CONTROLLER_VERTICAL_YTHETA = 2;
@@ -49,6 +56,7 @@ public class RobotController extends Activity {
     private TextView robotName;
     private ImageView userOption;
 
+    public RobotController(){ }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +68,9 @@ public class RobotController extends Activity {
         super.onResume();
 //        setLayout(RobotController.CONTROLLER_HORIZONTAL_STEER);
         setLayout(RobotController.CONTROLLER_VERTICAL_RTHETA);
+        Preconditions.checkNotNull(getIntent().getStringExtra("NAME"));
+        Preconditions.checkNotNull(getIntent().getStringExtra("URL"));
+        setURI(getIntent().getStringExtra("NAME"),getIntent().getBooleanExtra("URL",false));
     }
 
     /**
@@ -75,6 +86,8 @@ public class RobotController extends Activity {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 setContentView(R.layout.robotcontroller_vertical);
                 robotName = (TextView)findViewById(R.id.controllerRobotName);
+                userOption = (ImageView)findViewById(R.id.controllerUserOption);
+                userOption.setOnClickListener(optionClickListener);
                 velocityDisplayLayout = (LinearLayout) findViewById(R.id.velocity_display_layout);//textview for display velocity
                 joystickLayout = (LinearLayout)findViewById(R.id.robotController_joystickLayout);
                 velocityDisplayer = new Velocity_Display(RobotController.this);
@@ -138,6 +151,8 @@ public class RobotController extends Activity {
                 velocityDisplayLayout = (LinearLayout)findViewById(R.id.velocity_display_layout);
                 leftCtrLayout = (LinearLayout)findViewById(R.id.left_control_layout);
                 rightCtrLayout = (LinearLayout)findViewById(R.id.right_control_layout);
+                userOption = (ImageView)findViewById(R.id.controllerUserOption);
+                userOption.setOnClickListener(optionClickListener);
                 velocityDisplayer = new Velocity_Display(RobotController.this);
                 verticalScroll = (ScrollView)findViewById(R.id.verticalScroll);
                 verticalScroll.post(new Runnable(){
@@ -177,5 +192,17 @@ public class RobotController extends Activity {
             default:
                 break;
         }
+    }
+    private View.OnClickListener optionClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent userOpeionDialog = new Intent(RobotController.this,UserOptionDialog.class);
+            startActivityForResult(userOpeionDialog,0);
+        }
+    };
+
+    @Override
+    protected void init(NodeMainExecutor nodeMainExecutor) {
+
     }
 }

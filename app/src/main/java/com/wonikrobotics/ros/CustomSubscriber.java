@@ -8,7 +8,7 @@ import org.ros.node.topic.Subscriber;
 /**
  * Created by Felix on 2016-07-29.
  */
-public abstract class SubscribingSet {
+public abstract class CustomSubscriber {
 
     public abstract void subscribingRoutine(Message message);
 
@@ -17,7 +17,7 @@ public abstract class SubscribingSet {
 
     private Subscriber subscriber;
 
-    public SubscribingSet(String topicName, String sensorType){
+    public CustomSubscriber(String topicName, String sensorType){
 
         this.topicName = topicName;
         this.sensorType = sensorType;

@@ -1,4 +1,4 @@
-package com.wonikrobotics.mobilecontroller;
+package com.wonikrobotics.controller;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,6 +12,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import com.wonikrobotics.mobilecontroller.R;
 
 import java.util.Vector;
 
@@ -103,7 +105,7 @@ public class Joystick extends ImageView {
         Paint p = new Paint();
         p.setColor(color);
         p.setAntiAlias(true);
-        Bitmap rawImage=BitmapFactory.decodeResource(getResources(),R.drawable.ctr_thumb);
+        Bitmap rawImage=BitmapFactory.decodeResource(getResources(), R.drawable.ctr_thumb);
         Bitmap scaleImage = Bitmap.createScaledBitmap(rawImage,200,200,false);
         c.drawBitmap(scaleImage,(c.getWidth()/2)-100,(c.getHeight()/2)-100,null);
 

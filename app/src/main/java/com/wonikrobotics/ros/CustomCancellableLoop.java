@@ -6,14 +6,14 @@ import org.ros.node.ConnectedNode;
 /**
  * Created by Felix on 2016-07-29.
  */
-public abstract class PreCancellableLoop extends CancellableLoop {
+public abstract class CustomCancellableLoop extends CancellableLoop {
 
-    protected abstract void executeFinally();
+    protected abstract void onPreCancel();
 
     @Override
     public void cancel() {
 
-        executeFinally();
+        onPreCancel();
         super.cancel();
 
     }

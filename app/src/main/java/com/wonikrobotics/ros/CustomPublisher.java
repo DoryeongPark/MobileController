@@ -8,17 +8,17 @@ import org.ros.node.topic.PublisherListener;
 /**
  * Created by Felix on 2016-07-29.
  */
-public abstract class PublishingSet {
+public abstract class CustomPublisher {
 
     public abstract void publishingRoutine(ConnectedNode connectedNode);
-    public abstract void onLoopFinished();
+    public abstract void onLoopClear();
 
     private String topicName;
     private String sensorType;
     private int interval;
     private Publisher publisher;
 
-    public PublishingSet(String topicName, String sensorType, int interval){
+    public CustomPublisher(String topicName, String sensorType, int interval){
 
         this.topicName = topicName;
         this.sensorType = sensorType;
@@ -35,47 +35,47 @@ public abstract class PublishingSet {
             @Override
             public void onNewSubscriber(Publisher publisher, SubscriberIdentifier subscriberIdentifier) {
 
-                PublishingSet.this.onNewSubscriber(publisher, subscriberIdentifier);
+                CustomPublisher.this.onNewSubscriber(publisher, subscriberIdentifier);
 
             }
             @Override
             public void onShutdown(Publisher publisher) {
 
-                PublishingSet.this.onShutdown(publisher);
+                CustomPublisher.this.onShutdown(publisher);
 
             }
 
             @Override
             public void onMasterRegistrationSuccess(Object o) {
 
-                PublishingSet.this.onMasterRegistrationSuccess(o);
+                CustomPublisher.this.onMasterRegistrationSuccess(o);
 
             }
 
             @Override
             public void onMasterRegistrationFailure(Object o) {
 
-                PublishingSet.this.onMasterRegistrationFailure(o);
+                CustomPublisher.this.onMasterRegistrationFailure(o);
 
             }
 
             @Override
             public void onMasterUnregistrationSuccess(Object o) {
 
-                PublishingSet.this.onMasterUnregistrationSuccess(o);
+                CustomPublisher.this.onMasterUnregistrationSuccess(o);
 
             }
 
             @Override
             public void onMasterUnregistrationFailure(Object o) {
 
-                PublishingSet.this.onMasterUnregistrationFailure(o);
+                CustomPublisher.this.onMasterUnregistrationFailure(o);
 
             }
 
         });
 
-        PreCancellableLoop loop = new PreCancellableLoop(){
+        CustomCancellableLoop loop = new CustomCancellableLoop(){
 
             protected void loop() throws InterruptedException{
 
@@ -83,10 +83,10 @@ public abstract class PublishingSet {
 
                 Thread.sleep(interval);
             }
+            @Override
+            protected void onPreCancel(){
 
-            protected void executeFinally(){
-
-                onLoopFinished();
+                onLoopClear();
 
             }
 

@@ -13,17 +13,17 @@ import java.util.Vector;
  */
 public class AndroidNode extends AbstractNodeMain implements NodeMain{
 
-    private Vector<PublishingSet> publishers;
-    private Vector<SubscribingSet> subscribers;
+    private Vector<CustomPublisher> publishers;
+    private Vector<CustomSubscriber> subscribers;
 
     public AndroidNode(){}
-
+    @Override
     public GraphName getDefaultNodeName(){
 
         return GraphName.of("AndroidNode");
 
     }
-
+    @Override
     public void onStart(final ConnectedNode connectedNode){
 
         for(int i = 0; i < publishers.size(); ++i)
@@ -33,26 +33,26 @@ public class AndroidNode extends AbstractNodeMain implements NodeMain{
             subscribers.elementAt(i).onStart(connectedNode);
 
     }
-
+    @Override
     public void onShutdown(Node node) {
 
     }
-
+    @Override
     public void onShutdownComplete(Node node) {
 
     }
-
+    @Override
     public void onError(Node node, Throwable throwable) {
 
     }
 
-    public void addPublisher(PublishingSet ps){
+    public void addPublisher(CustomPublisher ps){
 
         publishers.add(ps);
 
     }
 
-    public void addSubscriber(SubscribingSet ss){
+    public void addSubscriber(CustomSubscriber ss){
 
         subscribers.add(ss);
 

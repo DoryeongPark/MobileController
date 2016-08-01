@@ -96,9 +96,7 @@
                         android:src="@drawable/rightarrow"/>
                     </LinearLayout>
                 </LinearLayout>
-
         </LinearLayout>
-
     </LinearLayout>
     <LinearLayout
         android:id="@+id/velocity_display_layout"
@@ -111,15 +109,25 @@
         android:gravity="center"
         android:weightSum="10">
     </LinearLayout>
-    <LinearLayout
-        android:id="@+id/robotController_joystickLayout"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0px"
+        android:layout_height="0dp"
         android:layout_weight="4.5"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:background="#e6e6e6">
-
-    </LinearLayout>
+        android:gravity="center">
+        <LinearLayout
+            android:id="@+id/robotController_joystickLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="#e6e6e6">
+        </LinearLayout>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ground_circle">
+        </ImageView>
+    </FrameLayout>
 
 </LinearLayout>

@@ -1,0 +1,120 @@
+package com.wonikrobotics.ros;
+
+import org.ros.internal.node.topic.SubscriberIdentifier;
+import org.ros.node.ConnectedNode;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.PublisherListener;
+
+/**
+ * Created by Felix on 2016-07-29.
+ */
+public abstract class PublishingSet {
+
+    public abstract void publishingRoutine(ConnectedNode connectedNode);
+    public abstract void onLoopFinished();
+
+    private String topicName;
+    private String sensorType;
+    private int interval;
+    private Publisher publisher;
+
+    public PublishingSet(String topicName, String sensorType, int interval){
+
+        this.topicName = topicName;
+        this.sensorType = sensorType;
+        this.interval = interval;
+
+    }
+
+    public void onStart(final ConnectedNode connectedNode){
+
+        publisher =
+                connectedNode.newPublisher(topicName, sensorType);
+
+        publisher.addListener(new PublisherListener() {
+            @Override
+            public void onNewSubscriber(Publisher publisher, SubscriberIdentifier subscriberIdentifier) {
+
+                PublishingSet.this.onNewSubscriber(publisher, subscriberIdentifier);
+
+            }
+            @Override
+            public void onShutdown(Publisher publisher) {
+
+                PublishingSet.this.onShutdown(publisher);
+
+            }
+
+            @Override
+            public void onMasterRegistrationSuccess(Object o) {
+
+                PublishingSet.this.onMasterRegistrationSuccess(o);
+
+            }
+
+            @Override
+            public void onMasterRegistrationFailure(Object o) {
+
+                PublishingSet.this.onMasterRegistrationFailure(o);
+
+            }
+
+            @Override
+            public void onMasterUnregistrationSuccess(Object o) {
+
+                PublishingSet.this.onMasterUnregistrationSuccess(o);
+
+            }
+
+            @Override
+            public void onMasterUnregistrationFailure(Object o) {
+
+                PublishingSet.this.onMasterUnregistrationFailure(o);
+
+            }
+
+        });
+
+        PreCancellableLoop loop = new PreCancellableLoop(){
+
+            protected void loop() throws InterruptedException{
+
+                publishingRoutine(connectedNode);
+
+                Thread.sleep(interval);
+            }
+
+            protected void executeFinally(){
+
+                onLoopFinished();
+
+            }
+
+        };
+
+        connectedNode.executeCancellableLoop(loop);
+
+    }
+
+    public String getTopicName(){
+
+        return topicName;
+
+    }
+
+    public String getSensorType(){
+
+        return sensorType;
+
+    }
+
+    //Functions for overriding
+
+    public void onNewSubscriber(Publisher publisher, SubscriberIdentifier subscriberIdentifier){}
+    public void onShutdown(Publisher publisher){}
+    public void onMasterRegistrationSuccess(Object o){}
+    public void onMasterRegistrationFailure(Object o){}
+    public void onMasterUnregistrationSuccess(Object o){}
+    public void onMasterUnregistrationFailure(Object o){}
+
+}

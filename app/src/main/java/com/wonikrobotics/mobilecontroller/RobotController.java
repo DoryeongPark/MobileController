@@ -34,6 +34,7 @@ public class RobotController extends Activity {
     private LinearLayout joystickLayout;
     private LinearLayout leftCtrLayout,rightCtrLayout;
     private Velocity_Display velocityDisplayer;
+    private Joystick joystick;
 
     /** define views for display sensor data **/
     private ImageView camera;
@@ -102,22 +103,21 @@ public class RobotController extends Activity {
                          *
                          ****/
                         horizontalScroll.addView(innerScroll);
-                        Rect joystickArea;
+                        Rect joystickArea = new Rect();
+                        joystickLayout.getGlobalVisibleRect(joystickArea);
                         if(joystickLayout.getWidth() > joystickLayout.getHeight()){
-                            joystickArea = new Rect(joystickLayout.getWidth()/2-joystickLayout.getHeight()/2,0
-                                    ,joystickLayout.getWidth()/2+joystickLayout.getHeight()/2,joystickLayout.getHeight());
+                            joystickArea = new Rect(joystickLayout.getWidth()/2-joystickLayout.getHeight()/2,joystickArea.top
+                                    ,joystickLayout.getWidth()/2+joystickLayout.getHeight()/2,joystickLayout.getHeight()+joystickArea.top);
                         }else{
-                            joystickArea = new Rect(0,joystickLayout.getHeight()/2-joystickLayout.getWidth()/2
-                                    ,joystickLayout.getWidth(),joystickLayout.getHeight()/2+joystickLayout.getWidth()/2);
+                            joystickArea = new Rect(0,(joystickLayout.getHeight()/2-joystickLayout.getWidth()/2) + joystickArea.top
+                                    ,joystickLayout.getWidth(),(joystickLayout.getHeight()/2+joystickLayout.getWidth()/2)+joystickArea.top);
                         }
                         if(flag == RobotController.CONTROLLER_VERTICAL_RTHETA){
-                            /*
-                            *
-                            * *  create joysticView on joystickLayout. (R-Theta)
-                            * *  joysticArea is Rect for joystick
-                            * *  set Listeners for joystick
-                            *
-                             */
+
+                            joystick = new Joystick(RobotController.this);
+                            joystick.setAreaMovable(joystickArea);
+                            joystickLayout.addView(joystick);
+
                         }else{
                             /*
                             *

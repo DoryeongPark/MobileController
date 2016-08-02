@@ -6,8 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -39,20 +37,22 @@ public class AvailableRobotListAdapter extends BaseAdapter {
         return robotList.get(position);
     }
     @Override
-    public View getView(int position, View convertView, ViewGroup parent){
+    public View getView(final int position, View convertView, ViewGroup parent) {
         if(convertView == null){
             convertView = inflater.inflate(R.layout.availablerobotlistitem,parent,false);
         }
-        convertView.setTag(position);
         ((TextView)convertView.findViewById(R.id.availablerobotlist_robotname)).setText(robotList.get(position).getRobotName());
-        ((ImageView)convertView.findViewById(R.id.availablerobotlist_option)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent optionDialog = new Intent(mContext,UserOptionDialog.class);
-                optionDialog.putExtra("IDX",robotList.get((int)v.getTag()).getIdx());
-                mContext.startActivity(optionDialog);
-            }
-        });
+        if (robotList.get(position).getIdx() >= 0) {
+            convertView.findViewById(R.id.availablerobotlist_option).setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    Intent optionDialog = new Intent(mContext, UserOptionDialog.class);
+                    optionDialog.putExtra("IDX", robotList.get(position).getIdx());
+                    mContext.startActivity(optionDialog);
+                }
+            });
+        }
         return convertView;
     }
 }

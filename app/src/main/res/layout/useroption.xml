@@ -2,36 +2,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="250dp"
     android:layout_height="300dp"
-    android:weightSum="10"
     android:background="@drawable/roundshape"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:weightSum="10">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0px"
-        android:layout_weight="1.5"
-        android:orientation="vertical"
-        android:background="#1b235f">
+        android:layout_weight="1.4"
+        android:background="#1b235f"
+        android:orientation="vertical">
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:textColor="#ffffff"
             android:text="S e t t i n g"
+            android:textColor="#ffffff"
             android:textSize="10pt"/>
     </LinearLayout>
     <View
         android:layout_width="match_parent"
         android:layout_height="0px"
-        android:layout_weight="0.5"
+        android:layout_weight="0.4"
         android:background="#bdbdbe"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:layout_weight="4"
-        android:weightSum="1"
-        android:gravity="center"
         android:background="#e6e6e6"
-        android:orientation="horizontal">
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="1">
         <LinearLayout
             android:layout_width="0px"
             android:layout_height="match_parent"
@@ -41,8 +41,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="0px"
                 android:layout_weight="1"
-                android:textColor="#000000"
                 android:text="Controller"
+                android:textColor="#000000"
                 android:textSize="9pt"/>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -56,10 +56,10 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="@drawable/lefttopviolet"
-                    android:textColor="#ffffff"
-                    android:textSize="7pt"
                     android:gravity="center"
                     android:text="DoubleLever"
+                    android:textColor="#ffffff"
+                    android:textSize="7pt"
                     />
                 <View
                     android:layout_width="2dp"
@@ -70,10 +70,10 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="@drawable/righttopwhite"
-                    android:textColor="#000000"
-                    android:textSize="7pt"
                     android:gravity="center"
                     android:text="JoyStick1"
+                    android:textColor="#000000"
+                    android:textSize="7pt"
                     />
 
 
@@ -93,10 +93,10 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="@drawable/leftbottomviolet"
-                    android:textColor="#ffffff"
-                    android:textSize="7pt"
                     android:gravity="center"
                     android:text="LeverNWheel"
+                    android:textColor="#ffffff"
+                    android:textSize="7pt"
                     />
                 <View
                     android:layout_width="2dp"
@@ -107,10 +107,10 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="@drawable/rightbottomwhite"
-                    android:textColor="#000000"
                     android:gravity="center"
-                    android:textSize="7pt"
                     android:text="JoyStick2"
+                    android:textColor="#000000"
+                    android:textSize="7pt"
                     />
 
 
@@ -121,10 +121,10 @@
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:layout_weight="4"
-        android:weightSum="1"
-        android:gravity="center"
         android:background="#e6e6e6"
-        android:orientation="horizontal">
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="1">
         <LinearLayout
             android:layout_width="0px"
             android:layout_height="match_parent"
@@ -151,19 +151,19 @@
                         android:layout_width="0px"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:textColor="#000000"
-                        android:textSize="7pt"
                         android:gravity="center_vertical|left"
-                        android:text="Angular"/>
+                        android:text="Angular"
+                        android:textColor="#000000"
+                        android:textSize="7pt" />
                     <TextView
                         android:id="@+id/useropt_sst_angulartxt"
                         android:layout_width="0px"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:textColor="#000000"
-                        android:textSize="7pt"
                         android:gravity="center_vertical|right"
-                        android:text="0.8"/>
+                        android:text="0.8"
+                        android:textColor="#000000"
+                        android:textSize="7pt" />
                 </LinearLayout>
                 <SeekBar
                     android:id="@+id/useropt_sst_angularbar"
@@ -187,19 +187,19 @@
                         android:layout_width="0px"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:textColor="#000000"
-                        android:textSize="7pt"
                         android:gravity="center_vertical|left"
-                        android:text="Velocity"/>
+                        android:text="Velocity"
+                        android:textColor="#000000"
+                        android:textSize="7pt" />
                     <TextView
                         android:id="@+id/useropt_sst_veltxt"
                         android:layout_width="0px"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:textColor="#000000"
-                        android:textSize="7pt"
                         android:gravity="center_vertical|right"
-                        android:text="0.8"/>
+                        android:text="0.8"
+                        android:textColor="#000000"
+                        android:textSize="7pt" />
                 </LinearLayout>
                 <SeekBar
                     android:id="@+id/useropt_sst_velbar"
@@ -212,4 +212,10 @@
 
         </LinearLayout>
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="0.2"
+        android:background="#e6e6e6"></View>
 </LinearLayout>

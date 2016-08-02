@@ -65,15 +65,21 @@ public class RobotController extends CustomRosActivity {
     private float angular;
 
     /** base app views **/
-    private TextView robotName;
+    private TextView robotNameTxt;
     private ImageView userOption;
+    private int idx = -1;
+    private String robotNameStr;
     private View.OnClickListener optionClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Intent userOpsionDialog = new Intent(RobotController.this, UserOptionDialog.class);
-            startActivityForResult(userOpsionDialog, 0);
+            setPAUSE_STATE(PAUSE_WITHOUT_STOP);
+            Intent userOptionDialog = new Intent(RobotController.this, UserOptionDialog.class);
+            userOptionDialog.putExtra("IDX", idx);
+            startActivityForResult(userOptionDialog, 0);
         }
     };
+
+
     public RobotController(){ }
 
     @Override
@@ -85,11 +91,15 @@ public class RobotController extends CustomRosActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        getUserOption();
-        setLayout(currentSelectedController);
+
         Preconditions.checkNotNull(getIntent().getStringExtra("NAME"));
         Preconditions.checkNotNull(getIntent().getStringExtra("URL"));
         Preconditions.checkNotNull(getIntent().getBooleanExtra("MASTER",false));
+        Preconditions.checkNotNull(getIntent().getIntExtra("IDX", -1));
+        robotNameStr = getIntent().getStringExtra("NAME");
+        idx = getIntent().getIntExtra("IDX", -1);
+        getUserOption(getIntent().getIntExtra("IDX", -1));
+        setLayout(currentSelectedController);
         setURI(getIntent().getStringExtra("URL"),getIntent().getBooleanExtra("MASTER",false));
     }
 
@@ -105,16 +115,19 @@ public class RobotController extends CustomRosActivity {
             case RobotController.CONTROLLER_VERTICAL_YTHETA:
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 setContentView(R.layout.robotcontroller_vertical);
-                robotName = (TextView)findViewById(R.id.controllerRobotName);
+                robotNameTxt = (TextView) findViewById(R.id.controllerRobotName);
                 userOption = (ImageView)findViewById(R.id.controllerUserOption);
                 userOption.setOnClickListener(optionClickListener);
                 velocityDisplayLayout = (LinearLayout) findViewById(R.id.velocity_display_layout);//textview for display velocity
                 joystickLayout = (LinearLayout)findViewById(R.id.robotController_joystickLayout);
                 velocityDisplayer = new Velocity_Display(RobotController.this);
+                robotNameTxt.setText(robotNameStr);
                 horizontalScroll = (HorizontalScrollView)findViewById(R.id.horizontalScroll);
                 horizontalScroll.post(new Runnable() {
                     @Override
                     public void run() {
+                        setPAUSE_STATE(PAUSE_WITHOUT_STOP);
+                        velocityDisplayLayout.removeAllViews();
                         velocityDisplayLayout.addView(velocityDisplayer);
                         innerScroll = new LinearLayout(horizontalScroll.getContext());
                         innerScroll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -135,6 +148,7 @@ public class RobotController extends CustomRosActivity {
                          *
                          *
                          ****/
+                        horizontalScroll.removeAllViews();
                         horizontalScroll.addView(innerScroll);
                         Rect joystickArea = new Rect();
                         joystickLayout.getGlobalVisibleRect(joystickArea);
@@ -149,6 +163,7 @@ public class RobotController extends CustomRosActivity {
 
                             joystick = new Joystick(RobotController.this);
                             joystick.setAreaMovable(joystickArea);
+                            joystickLayout.removeAllViews();
                             joystickLayout.addView(joystick);
                             joystick.setOnJoystickListener(new Joystick.JoystickListener() {
                                 @Override
@@ -170,17 +185,21 @@ public class RobotController extends CustomRosActivity {
                             *
                              */
                         }
+                        setPAUSE_STATE(PAUSE_WITH_STOP);
                     }
+
                 });
                 break;
             case RobotController.CONTROLLER_HORIZONTAL_STEER:
             case RobotController.CONTROLLER_HORIZONTAL_DOUBLELEVER:
+                setPAUSE_STATE(PAUSE_WITHOUT_STOP);
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                 setContentView(R.layout.robotcontroller_horizontal);
-                robotName = (TextView)findViewById(R.id.controllerRobotName);
+                robotNameTxt = (TextView) findViewById(R.id.controllerRobotName);
                 velocityDisplayLayout = (LinearLayout)findViewById(R.id.velocity_display_layout);
                 leftCtrLayout = (LinearLayout)findViewById(R.id.left_control_layout);
                 rightCtrLayout = (LinearLayout)findViewById(R.id.right_control_layout);
+                robotNameTxt.setText(robotNameStr);
                 userOption = (ImageView)findViewById(R.id.controllerUserOption);
                 userOption.setOnClickListener(optionClickListener);
                 velocityDisplayer = new Velocity_Display(RobotController.this);
@@ -188,26 +207,31 @@ public class RobotController extends CustomRosActivity {
                 verticalScroll.post(new Runnable(){
                     @Override
                     public void run() {
+                        velocityDisplayLayout.removeAllViews();
                         velocityDisplayLayout.addView(velocityDisplayer);
                         innerScroll = new LinearLayout(verticalScroll.getContext());
                         innerScroll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                        verticalScroll.removeAllViews();
                         verticalScroll.addView(innerScroll);
+                        leftCtrLayout.removeAllViews();
+                        rightCtrLayout.removeAllViews();
                         leftCtrLayout.addView(new ControlLever(RobotController.this) {
                             @Override
                             public void onProgressChanged(int progress, boolean fromUser) {
-
-                                velocity = progress;
+                                velocity = progress == 0 ? 0 : -1 * progress / 100f;
                                 velocityDisplayer.setVel(Math.abs(progress));
                             }
                         });
+
                         if(flag == RobotController.CONTROLLER_HORIZONTAL_STEER){
                             rightCtrLayout.addView(new ControlWheel(RobotController.this) {
                                 @Override
                                 public void onAngleChanged(int angle, boolean fromUser) {
-                                    angular = angle;
+                                    angular = angle == 0 ? 0 : angle / -180f;
                                 }
                             });
                         }else{
+
                             rightCtrLayout.addView(new ControlLever(RobotController.this) {
                                 @Override
                                 public void onProgressChanged(int progress, boolean fromUser) {
@@ -215,7 +239,7 @@ public class RobotController extends CustomRosActivity {
                                 }
                             });
                         }
-
+                        setPAUSE_STATE(PAUSE_WITH_STOP);
                     }
                 });
                 break;
@@ -224,16 +248,25 @@ public class RobotController extends CustomRosActivity {
         }
     }
 
-    private void getUserOption(){
+    private void getUserOption(int idx) {
         DbOpenHelper mDbOpenHelper = new DbOpenHelper(RobotController.this);
         mDbOpenHelper.open();
-        Cursor c = mDbOpenHelper.getAllColumnsFromOption();
+        Cursor c = mDbOpenHelper.getAllColumns();
         if(c.getCount() != 0) {
-            c.moveToNext();
-            currentSelectedController = Integer.parseInt(c.getString(c.getColumnIndex(DataBases.CreateDB.CONTROLLER)));
-            velSensitive = Float.parseFloat(c.getString(c.getColumnIndex(DataBases.CreateDB.VELOCITY)));
-            angSensitive = Float.parseFloat(c.getString(c.getColumnIndex(DataBases.CreateDB.ANGULAR)));
-
+            idx = getIntent().getIntExtra("IDX", -1);
+            if (idx != -1) {
+                while (c.moveToNext() && c.getInt(c.getColumnIndex(DataBases.CreateDB.IDX)) != idx) {
+                }
+                if (c != null) {
+                    currentSelectedController = Integer.parseInt(c.getString(c.getColumnIndex(DataBases.CreateDB.CONTROLLER)));
+                    velSensitive = Float.parseFloat(c.getString(c.getColumnIndex(DataBases.CreateDB.VELOCITY)));
+                    angSensitive = Float.parseFloat(c.getString(c.getColumnIndex(DataBases.CreateDB.ANGULAR)));
+                }
+            } else {
+                currentSelectedController = 1;
+                velSensitive = 1.0f;
+                angSensitive = 1.0f;
+            }
         }else{
             currentSelectedController = 1;
             velSensitive = 1.0f;
@@ -300,5 +333,14 @@ public class RobotController extends CustomRosActivity {
 
         nodeMainExecutor.execute(androidNode, nodeConfiguration);
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (resultCode == 0) {
+            setPAUSE_STATE(PAUSE_WITHOUT_STOP);
+            getUserOption(idx);
+            setLayout(currentSelectedController);
+        }
     }
 }

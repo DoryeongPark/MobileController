@@ -31,18 +31,51 @@ public class RobotInformation {
         this.angSensitive = ang;
     }
     public void setMasterUri(String str){this.uri_str = str;}
+
+    public float getVelSensitive() {
+        return this.velSensitive;
+    }
+
+    public void setVelSensitive(float vel) {
+        this.velSensitive = vel;
+    }
+
+    public float getAngSensitive() {
+        return this.angSensitive;
+    }
+
+    public void setAngSensitive(float ang) {
+        this.angSensitive = ang;
+    }
+
+    public int getCtr() {
+        return this.controller;
+    }
+
+    public void setCtr(int ctr) {
+        this.controller = ctr;
+    }
+
+    public int getIdx() {
+        return this.idx;
+    }
+
+    public Uri getMasterUri() {
+        return this.masterUri;
+    }
+
     public void setMasterUri(Uri input){
         this.masterUri = input;
     }
+
+    public String getRobotName() {
+        return this.robotName;
+    }
+
     public void setRobotName(String name){
         this.robotName = name;
     }
-    public void setCtr(int ctr){this.controller = ctr;}
-    public void setVelSensitive(float vel){this.velSensitive = vel;}
-    public void setAngSensitive(float ang){this.angSensitive = ang;}
-    public int getIdx(){return this.idx;}
-    public Uri getMasterUri(){return this.masterUri;}
-    public String getRobotName(){return this.robotName;}
+
     public String getUri_str(){return this.uri_str;}
     public boolean getIsMaster(){return this.master;}
 

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -58,6 +59,7 @@ public class SelectRobot extends Activity {
                         controlActivity.putExtra("NAME", selected.getRobotName());
                         controlActivity.putExtra("URL", selected.getUri_str());
                         controlActivity.putExtra("MASTER", selected.getIsMaster());
+                        controlActivity.putExtra("IDX", selected.getIdx());
                         startActivity(controlActivity);
                     }else{
                         Toast.makeText(SelectRobot.this,"Please select the robot",Toast.LENGTH_SHORT).show();
@@ -107,7 +109,11 @@ public class SelectRobot extends Activity {
                     Uri.parse(c.getString(c.getColumnIndex(DataBases.CreateDB.URI)))
                     ,c.getString(c.getColumnIndex(DataBases.CreateDB.NAME)),
                     c.getString(c.getColumnIndex(DataBases.CreateDB.URI))
-                    ,Boolean.valueOf(c.getString(c.getColumnIndex(DataBases.CreateDB.MASTER))));
+                    , Boolean.valueOf(c.getString(c.getColumnIndex(DataBases.CreateDB.MASTER)))
+                    , Float.parseFloat(c.getString(c.getColumnIndex(DataBases.CreateDB.VELOCITY)))
+                    , Float.parseFloat(c.getString(c.getColumnIndex(DataBases.CreateDB.ANGULAR)))
+                    , Integer.parseInt(c.getString(c.getColumnIndex(DataBases.CreateDB.CONTROLLER))));
+            Log.e("list", Integer.toString(c.getInt(c.getColumnIndex(DataBases.CreateDB.IDX))));
             robotList.add(new_info);
         }
         c.close();
@@ -127,7 +133,7 @@ public class SelectRobot extends Activity {
                 mDbOpenHelper = new DbOpenHelper(SelectRobot.this);
             }
             mDbOpenHelper.open();
-            mDbOpenHelper.insertColumn(intent.getStringExtra("name"),intent.getStringExtra("uri"),intent.getStringExtra("master"));
+            mDbOpenHelper.insertColumn(intent.getStringExtra("name"), intent.getStringExtra("uri"), intent.getStringExtra("master"), "1", "1.0", "1.0");
             Toast.makeText(SelectRobot.this,"New robot registering is success",Toast.LENGTH_SHORT).show();
             robotListDataLoad();
         }else if(resultCode == 0){

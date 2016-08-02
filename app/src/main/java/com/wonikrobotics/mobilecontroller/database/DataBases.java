@@ -13,24 +13,17 @@ public final class DataBases {
         public static final String _TABLENAME = "robotlist";
         public static final String MASTER = "master";
         public static final String IDX = "idx";
+        public static final String CONTROLLER = "controller";
+        public static final String ANGULAR = "angular";
+        public static final String VELOCITY = "velocity";
         public static final String _CREATE =
                 "create table "+_TABLENAME+" ( "
                         +IDX+" integer primary key autoincrement, "
                         +NAME+" text not null , "
                         +MASTER+" text not null , "
-                        +URI+" text not null );";
-
-
-        public static final String _OPTIONTABLE = "option";
-        public static final String CONTROLLER = "controller";
-        public static final String ANGULAR = "angular";
-        public static final String VELOCITY = "velocity";
-        public static final String _CREATEOPTION =
-                "create table "+_OPTIONTABLE+" ( "
+                        + URI + " text not null , "
                         +CONTROLLER+" text not null , "
                         +VELOCITY+" text not null , "
                         +ANGULAR+" text not null );";
-
-
     }
 }

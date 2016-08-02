@@ -7,6 +7,10 @@ import android.os.Handler;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import com.wonikrobotics.ros.AndroidNode;
+import com.wonikrobotics.ros.CustomPublisher;
+import com.wonikrobotics.ros.CustomSubscriber;
+
 import org.ros.address.InetAddressFactory;
 import org.ros.android.RosActivity;
 import org.ros.internal.message.Message;
@@ -29,12 +33,6 @@ public class MainActivity extends Activity {
         }
     };
 
-    public MainActivity(){
-
-        //super("Mobile Controller", "Mobile Controller");
-
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,49 +52,5 @@ public class MainActivity extends Activity {
         super.onBackPressed();
 
     }
-
-
-//    @Override
-//    public void init(NodeMainExecutor nodeMainExecutor){
-//
-//        NodeConfiguration nodeConfiguration =
-//                NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
-//        nodeConfiguration.setMasterUri(getMasterUri());
-//
-//        CustomPublisher pSet = new CustomPublisher("mobile_base/commands/velocity",
-//                geometry_msgs.Twist._TYPE, 100) {
-//            @Override
-//            public void publishingRoutine(ConnectedNode connectedNode) {
-//
-//            }
-//
-//            @Override
-//            public void onLoopFinished() {
-//
-//            }
-//
-//        };
-//
-//        CustomSubscriber sSet = new CustomSubscriber("p1_sonar", sensor_msgs.Range._TYPE){
-//            @Override
-//            public void subscribingRoutine(Message message) {
-//
-//                sensor_msgs.Range msg = (sensor_msgs.Range)message;
-//
-//                System.out.println(msg.getRange());
-//
-//            }
-//
-//        };
-//
-//
-//        AndroidNode androidNode = new AndroidNode();
-//
-//        androidNode.addSubscriber(sSet);
-//
-//        nodeMainExecutor.execute(androidNode, nodeConfiguration);
-//
-//    }
-
 
 }

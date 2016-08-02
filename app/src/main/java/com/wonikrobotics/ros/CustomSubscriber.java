@@ -28,9 +28,9 @@ public abstract class CustomSubscriber {
 
         subscriber = connectedNode.newSubscriber(topicName, sensorType);
 
-        subscriber.addMessageListener(new MessageListener<Message>() {
+        subscriber.addMessageListener(new MessageListener<sensor_msgs.Range>() {
             @Override
-            public void onNewMessage(Message message) {
+            public void onNewMessage(sensor_msgs.Range message) {
 
                 subscribingRoutine(message);
 

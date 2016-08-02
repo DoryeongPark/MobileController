@@ -64,7 +64,7 @@ public class SelectRobot extends Activity {
                         Intent controlActivity = new Intent(SelectRobot.this, RobotController.class);
                         controlActivity.putExtra("NAME", selected.getRobotName());
                         controlActivity.putExtra("URL", selected.getUri_str());
-                        controlActivity.putExtra("MASTER",selected.getIsMaster());
+                        controlActivity.putExtra("MASTER", selected.getIsMaster());
                         startActivity(controlActivity);
                     }else{
                         Toast.makeText(SelectRobot.this,"Please select the robot",Toast.LENGTH_SHORT).show();

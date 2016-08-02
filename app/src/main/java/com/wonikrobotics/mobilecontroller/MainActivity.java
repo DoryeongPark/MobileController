@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
 //                NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
 //        nodeConfiguration.setMasterUri(getMasterUri());
 //
-//        PublishingSet pSet = new PublishingSet("mobile_base/commands/velocity",
+//        CustomPublisher pSet = new CustomPublisher("mobile_base/commands/velocity",
 //                geometry_msgs.Twist._TYPE, 100) {
 //            @Override
 //            public void publishingRoutine(ConnectedNode connectedNode) {
@@ -77,7 +77,7 @@ public class MainActivity extends Activity {
 //
 //        };
 //
-//        SubscribingSet sSet = new SubscribingSet("p1_sonar", sensor_msgs.Range._TYPE){
+//        CustomSubscriber sSet = new CustomSubscriber("p1_sonar", sensor_msgs.Range._TYPE){
 //            @Override
 //            public void subscribingRoutine(Message message) {
 //

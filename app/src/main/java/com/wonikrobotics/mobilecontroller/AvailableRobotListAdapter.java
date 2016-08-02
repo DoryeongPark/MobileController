@@ -1,10 +1,12 @@
 package com.wonikrobotics.mobilecontroller;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -41,7 +43,16 @@ public class AvailableRobotListAdapter extends BaseAdapter {
         if(convertView == null){
             convertView = inflater.inflate(R.layout.availablerobotlistitem,parent,false);
         }
+        convertView.setTag(position);
         ((TextView)convertView.findViewById(R.id.availablerobotlist_robotname)).setText(robotList.get(position).getRobotName());
+        ((ImageView)convertView.findViewById(R.id.availablerobotlist_option)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent optionDialog = new Intent(mContext,UserOptionDialog.class);
+                optionDialog.putExtra("IDX",robotList.get((int)v.getTag()).getIdx());
+                mContext.startActivity(optionDialog);
+            }
+        });
         return convertView;
     }
 }

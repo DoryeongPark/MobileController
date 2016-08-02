@@ -11,12 +11,24 @@ public class RobotInformation {
     private String uri_str;
     private int idx;
     private boolean master;
+    private float velSensitive,angSensitive;
+    private int controller;
     public RobotInformation(int idx, Uri masterUri, String robotName, String masterUri_str, boolean master){
         this.idx = idx;
         this.masterUri = masterUri;
         this.robotName = robotName;
         this.uri_str = masterUri_str;
         this.master = master;
+    }
+    public RobotInformation(int idx, Uri masterUri, String robotName, String masterUri_str, boolean master , float vel,float ang, int ctr){
+        this.idx = idx;
+        this.masterUri = masterUri;
+        this.robotName = robotName;
+        this.uri_str = masterUri_str;
+        this.master = master;
+        this.controller = ctr;
+        this.velSensitive = vel;
+        this.angSensitive = ang;
     }
     public void setMasterUri(String str){this.uri_str = str;}
     public void setMasterUri(Uri input){
@@ -25,6 +37,9 @@ public class RobotInformation {
     public void setRobotName(String name){
         this.robotName = name;
     }
+    public void setCtr(int ctr){this.controller = ctr;}
+    public void setVelSensitive(float vel){this.velSensitive = vel;}
+    public void setAngSensitive(float ang){this.angSensitive = ang;}
     public int getIdx(){return this.idx;}
     public Uri getMasterUri(){return this.masterUri;}
     public String getRobotName(){return this.robotName;}

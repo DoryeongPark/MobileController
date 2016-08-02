@@ -22,32 +22,33 @@ public class DbOpenHelper {
     private class DatabaseHelper extends SQLiteOpenHelper {
 
         // 생성자
-        public DatabaseHelper(Context context, String name,
-                              SQLiteDatabase.CursorFactory factory, int version) {
-            super(context, name, factory, version);
+        public DatabaseHelper(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
         // 최초 DB를 만들때 한번만 호출된다.
         @Override
         public void onCreate(SQLiteDatabase db) {
+            db.execSQL(DataBases.CreateDB._CREATEOPTION);
             db.execSQL(DataBases.CreateDB._CREATE);
-
         }
 
         // 버전이 업데이트 되었을 경우 DB를 다시 만들어 준다.
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             db.execSQL("DROP TABLE IF EXISTS " + DataBases.CreateDB._TABLENAME);
+            db.execSQL("DROP TABLE IF EXISTS " + DataBases.CreateDB._OPTIONTABLE);
             onCreate(db);
         }
     }
 
     public DbOpenHelper(Context context) {
         this.mCtx = context;
+        Log.e("helper",mCtx.toString());
     }
 
     public DbOpenHelper open() throws SQLException {
-        mDBHelper = new DatabaseHelper(mCtx, DATABASE_NAME, null, DATABASE_VERSION);
+        mDBHelper = new DatabaseHelper(mCtx);
         mDB = mDBHelper.getWritableDatabase();
         return this;
     }
@@ -58,6 +59,18 @@ public class DbOpenHelper {
 
     public Cursor getAllColumns(){
         return mDB.query(DataBases.CreateDB._TABLENAME, null, null, null, null, null, null);
+    }
+    public Cursor getAllColumnsFromOption(){
+        return mDB.query(DataBases.CreateDB._OPTIONTABLE, null, null, null, null, null, null);
+    }
+    public boolean insertOption(String controller,String velocity,String angular){
+        mDB.delete(DataBases.CreateDB._OPTIONTABLE, "*" , null);
+        ContentValues values = new ContentValues();
+        values.put(DataBases.CreateDB.CONTROLLER, controller);
+        values.put(DataBases.CreateDB.VELOCITY, velocity);
+        values.put(DataBases.CreateDB.ANGULAR, angular);
+        Log.d("DataBase","insert "+controller+","+velocity+","+angular);
+        return mDB.insert(DataBases.CreateDB._OPTIONTABLE, null, values)>0;
     }
 
     public boolean insertColumn(String name, String uri,String master){

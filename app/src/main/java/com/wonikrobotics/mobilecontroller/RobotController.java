@@ -3,6 +3,7 @@ package com.wonikrobotics.mobilecontroller;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
@@ -17,6 +18,8 @@ import com.google.common.base.Preconditions;
 import com.wonikrobotics.controller.ControlLever;
 import com.wonikrobotics.controller.ControlWheel;
 import com.wonikrobotics.controller.Joystick;
+import com.wonikrobotics.mobilecontroller.database.DataBases;
+import com.wonikrobotics.mobilecontroller.database.DbOpenHelper;
 import com.wonikrobotics.ros.CustomRosActivity;
 import com.wonikrobotics.views.Velocity_Display;
 
@@ -42,6 +45,8 @@ public class RobotController extends CustomRosActivity {
     private LinearLayout leftCtrLayout,rightCtrLayout;
     private Velocity_Display velocityDisplayer;
     private Joystick joystick;
+    private int currentSelectedController;
+    private float velSensitive,angSensitive;
 
     /** define views for display sensor data **/
     private ImageView camera;
@@ -66,11 +71,12 @@ public class RobotController extends CustomRosActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        setLayout(RobotController.CONTROLLER_HORIZONTAL_STEER);
-        setLayout(RobotController.CONTROLLER_VERTICAL_RTHETA);
+        getUserOption();
+        setLayout(currentSelectedController);
         Preconditions.checkNotNull(getIntent().getStringExtra("NAME"));
         Preconditions.checkNotNull(getIntent().getStringExtra("URL"));
-        setURI(getIntent().getStringExtra("NAME"),getIntent().getBooleanExtra("URL",false));
+        Preconditions.checkNotNull(getIntent().getBooleanExtra("MASTER",false));
+        setURI(getIntent().getStringExtra("URL"),getIntent().getBooleanExtra("MASTER",false));
     }
 
     /**
@@ -196,13 +202,32 @@ public class RobotController extends CustomRosActivity {
     private View.OnClickListener optionClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Intent userOpeionDialog = new Intent(RobotController.this,UserOptionDialog.class);
-            startActivityForResult(userOpeionDialog,0);
+            Intent userOpsionDialog = new Intent(RobotController.this,UserOptionDialog.class);
+            startActivityForResult(userOpsionDialog,0);
         }
     };
+    private void getUserOption(){
+        DbOpenHelper mDbOpenHelper = new DbOpenHelper(RobotController.this);
+        mDbOpenHelper.open();
+        Cursor c = mDbOpenHelper.getAllColumnsFromOption();
+        if(c.getCount() != 0) {
+            c.moveToNext();
+            currentSelectedController = Integer.parseInt(c.getString(c.getColumnIndex(DataBases.CreateDB.CONTROLLER)));
+            velSensitive = Float.parseFloat(c.getString(c.getColumnIndex(DataBases.CreateDB.VELOCITY)));
+            angSensitive = Float.parseFloat(c.getString(c.getColumnIndex(DataBases.CreateDB.ANGULAR)));
 
+        }else{
+            currentSelectedController = 1;
+            velSensitive = 1.0f;
+            angSensitive = 1.0f;
+        }
+        mDbOpenHelper.close();
+        mDbOpenHelper = null;
+
+    }
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
 
     }
+
 }

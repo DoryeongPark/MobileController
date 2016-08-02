@@ -19,5 +19,18 @@ public final class DataBases {
                         +NAME+" text not null , "
                         +MASTER+" text not null , "
                         +URI+" text not null );";
+
+
+        public static final String _OPTIONTABLE = "option";
+        public static final String CONTROLLER = "controller";
+        public static final String ANGULAR = "angular";
+        public static final String VELOCITY = "velocity";
+        public static final String _CREATEOPTION =
+                "create table "+_OPTIONTABLE+" ( "
+                        +CONTROLLER+" text not null , "
+                        +VELOCITY+" text not null , "
+                        +ANGULAR+" text not null );";
+
+
     }
 }

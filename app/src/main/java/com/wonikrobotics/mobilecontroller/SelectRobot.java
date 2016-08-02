@@ -64,6 +64,7 @@ public class SelectRobot extends Activity {
                         Intent controlActivity = new Intent(SelectRobot.this, RobotController.class);
                         controlActivity.putExtra("NAME", selected.getRobotName());
                         controlActivity.putExtra("URL", selected.getUri_str());
+                        controlActivity.putExtra("MASTER",selected.getIsMaster());
                         startActivity(controlActivity);
                     }else{
                         Toast.makeText(SelectRobot.this,"Please select the robot",Toast.LENGTH_SHORT).show();
@@ -75,11 +76,8 @@ public class SelectRobot extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        userOptionDataLoad();
         robotListDataLoad();
-    }
-    private void userOptionDataLoad(){
-
+        availableRobotList.setSelection(selectedRobotPosition);
     }
     private void robotListDataLoad(){
         if(robotList == null){

@@ -10,11 +10,8 @@ import org.ros.node.topic.Subscriber;
  */
 public abstract class CustomSubscriber {
 
-    public abstract void subscribingRoutine(Message message);
-
     private String topicName;
     private String sensorType;
-
     private Subscriber subscriber;
 
     public CustomSubscriber(String topicName, String sensorType){
@@ -23,6 +20,8 @@ public abstract class CustomSubscriber {
         this.sensorType = sensorType;
 
     }
+
+    public abstract void subscribingRoutine(Message message);
 
     public void onStart(ConnectedNode connectedNode) {
 

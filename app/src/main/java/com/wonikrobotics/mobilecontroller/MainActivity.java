@@ -7,19 +7,6 @@ import android.os.Handler;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
-import com.wonikrobotics.ros.AndroidNode;
-import com.wonikrobotics.ros.CustomPublisher;
-import com.wonikrobotics.ros.CustomSubscriber;
-
-import org.ros.address.InetAddressFactory;
-import org.ros.android.RosActivity;
-import org.ros.internal.message.Message;
-import org.ros.internal.node.topic.SubscriberIdentifier;
-import org.ros.node.ConnectedNode;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMainExecutor;
-import org.ros.node.topic.Publisher;
-
 public class MainActivity extends Activity {
     Handler handler;
     Runnable goOver = new Runnable() {

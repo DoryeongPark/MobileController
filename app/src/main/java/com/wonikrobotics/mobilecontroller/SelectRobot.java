@@ -3,7 +3,6 @@ package com.wonikrobotics.mobilecontroller;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -29,23 +28,17 @@ public class SelectRobot extends Activity {
     private AvailableRobotListAdapter robotListAdapter;
     private TextView btnConnect,robotName,robotURL,robotInfo;
     private int selectedRobotPosition = -1;
+    ListView.OnItemClickListener robotListListener = new ListView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if (robotList.get(position).getMasterUri() != null) {
+                robotName.setText(robotList.get(position).getRobotName());
+                robotURL.setText(robotList.get(position).getUri_str());
+                selectedRobotPosition = position;
+            }
+        }
+    };
     private ImageView btnOption,addRobot;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.selectrobot);
-        btnConnect = (TextView)findViewById(R.id.btnConnect);
-        availableRobotList = (ListView)findViewById(R.id.availablerobotlist);
-        btnOption = (ImageView)findViewById(R.id.select_robot_option);
-        addRobot = (ImageView)findViewById(R.id.select_robot_add);
-        robotName = (TextView)findViewById(R.id.robot_name);
-        robotURL = (TextView)findViewById(R.id.robot_url);
-        robotInfo = (TextView)findViewById(R.id.robot_info);
-        btnOption.setOnClickListener(clickListener);
-        addRobot.setOnClickListener(clickListener);
-        availableRobotList.setOnItemClickListener(robotListListener);
-        btnConnect.setOnClickListener(clickListener);
-    }
     private View.OnClickListener clickListener = new View.OnClickListener(){
         @Override
         public void onClick(View v) {
@@ -73,12 +66,31 @@ public class SelectRobot extends Activity {
             }
         }
     };
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.selectrobot);
+        btnConnect = (TextView) findViewById(R.id.btnConnect);
+        availableRobotList = (ListView) findViewById(R.id.availablerobotlist);
+        btnOption = (ImageView) findViewById(R.id.select_robot_option);
+        addRobot = (ImageView) findViewById(R.id.select_robot_add);
+        robotName = (TextView) findViewById(R.id.robot_name);
+        robotURL = (TextView) findViewById(R.id.robot_url);
+        robotInfo = (TextView) findViewById(R.id.robot_info);
+        btnOption.setOnClickListener(clickListener);
+        addRobot.setOnClickListener(clickListener);
+        availableRobotList.setOnItemClickListener(robotListListener);
+        btnConnect.setOnClickListener(clickListener);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         robotListDataLoad();
         availableRobotList.setSelection(selectedRobotPosition);
     }
+
     private void robotListDataLoad(){
         if(robotList == null){
             robotList = new ArrayList<RobotInformation>();
@@ -107,16 +119,6 @@ public class SelectRobot extends Activity {
         robotListAdapter = new AvailableRobotListAdapter(SelectRobot.this,robotList);
         availableRobotList.setAdapter(robotListAdapter);
     }
-    ListView.OnItemClickListener robotListListener = new ListView.OnItemClickListener(){
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-            if(robotList.get(position).getMasterUri()!=null){
-                robotName.setText(robotList.get(position).getRobotName());
-                robotURL.setText(robotList.get(position).getUri_str());
-                selectedRobotPosition = position;
-            }
-        }
-    };
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent){

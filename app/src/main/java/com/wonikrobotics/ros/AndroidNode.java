@@ -16,7 +16,7 @@ public class AndroidNode extends AbstractNodeMain implements NodeMain{
     private Vector<CustomPublisher> publishers;
     private Vector<CustomSubscriber> subscribers;
 
-    public AndroidNode(){
+    public AndroidNode() {
 
         publishers = new Vector<CustomPublisher>();
         subscribers = new Vector<CustomSubscriber>();

@@ -1,6 +1,5 @@
 package com.wonikrobotics.mobilecontroller;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
@@ -68,8 +67,15 @@ public class RobotController extends CustomRosActivity {
     /** base app views **/
     private TextView robotName;
     private ImageView userOption;
-
+    private View.OnClickListener optionClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent userOpsionDialog = new Intent(RobotController.this, UserOptionDialog.class);
+            startActivityForResult(userOpsionDialog, 0);
+        }
+    };
     public RobotController(){ }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -150,7 +156,7 @@ public class RobotController extends CustomRosActivity {
 
                                     RobotController.this.angular = angle / 90.0f * angleDir * accDir;
                                     RobotController.this.velocity = acc / 100.0f * accDir;
-                                    velocityDisplayer.setVel((int)Math.abs(acc));
+                                    velocityDisplayer.setVel((int) Math.abs(acc));
 
                                 }
                             });
@@ -217,13 +223,7 @@ public class RobotController extends CustomRosActivity {
                 break;
         }
     }
-    private View.OnClickListener optionClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent userOpsionDialog = new Intent(RobotController.this,UserOptionDialog.class);
-            startActivityForResult(userOpsionDialog,0);
-        }
-    };
+
     private void getUserOption(){
         DbOpenHelper mDbOpenHelper = new DbOpenHelper(RobotController.this);
         mDbOpenHelper.open();
@@ -250,7 +250,6 @@ public class RobotController extends CustomRosActivity {
         nodeConfiguration.setMasterUri(getMasterUri());
 
 
-
         CustomPublisher pSet = new CustomPublisher("mobile_base/commands/velocity",
                 geometry_msgs.Twist._TYPE, 100) {
             @Override
@@ -269,7 +268,7 @@ public class RobotController extends CustomRosActivity {
             }
 
             @Override
-            public void onLoopClear(Publisher publisher, ConnectedNode connectedNode){
+            public void onLoopClear(Publisher publisher, ConnectedNode connectedNode) {
 
                 geometry_msgs.Twist veloPubData = connectedNode.
                         getTopicMessageFactory().newFromType(Twist._TYPE);
@@ -285,11 +284,11 @@ public class RobotController extends CustomRosActivity {
 
         };
 
-        CustomSubscriber sSet = new CustomSubscriber("p1_sonar_1", sensor_msgs.Range._TYPE){
+        CustomSubscriber sSet = new CustomSubscriber("p1_sonar_1", sensor_msgs.Range._TYPE) {
             @Override
             public void subscribingRoutine(Message message) {
 
-                sensor_msgs.Range msg = (sensor_msgs.Range)message;
+                sensor_msgs.Range msg = (sensor_msgs.Range) message;
 
             }
         };
@@ -301,5 +300,5 @@ public class RobotController extends CustomRosActivity {
 
         nodeMainExecutor.execute(androidNode, nodeConfiguration);
 
-   }
+    }
 }

@@ -10,14 +10,10 @@ import org.ros.node.topic.PublisherListener;
  */
 public abstract class CustomPublisher {
 
-    public abstract void publishingRoutine(Publisher publisher, ConnectedNode connectedNode);
-    public abstract void onLoopClear(Publisher publisher, ConnectedNode connectedNode);
-
     private String topicName;
     private String sensorType;
     private int interval;
     private Publisher publisher;
-
     public CustomPublisher(String topicName, String sensorType, int interval){
 
         this.topicName = topicName;
@@ -25,6 +21,10 @@ public abstract class CustomPublisher {
         this.interval = interval;
 
     }
+
+    public abstract void publishingRoutine(Publisher publisher, ConnectedNode connectedNode);
+
+    public abstract void onLoopClear(Publisher publisher, ConnectedNode connectedNode);
 
     public void onStart(final ConnectedNode connectedNode){
 

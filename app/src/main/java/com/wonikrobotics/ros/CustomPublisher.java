@@ -10,8 +10,8 @@ import org.ros.node.topic.PublisherListener;
  */
 public abstract class CustomPublisher {
 
-    public abstract void publishingRoutine(ConnectedNode connectedNode);
-    public abstract void onLoopClear();
+    public abstract void publishingRoutine(Publisher publisher, ConnectedNode connectedNode);
+    public abstract void onLoopClear(Publisher publisher, ConnectedNode connectedNode);
 
     private String topicName;
     private String sensorType;
@@ -79,14 +79,14 @@ public abstract class CustomPublisher {
 
             protected void loop() throws InterruptedException{
 
-                publishingRoutine(connectedNode);
+                publishingRoutine(publisher, connectedNode);
 
                 Thread.sleep(interval);
             }
             @Override
             protected void onPreCancel(){
 
-                onLoopClear();
+                onLoopClear(publisher, connectedNode);
 
             }
 

@@ -17,10 +17,20 @@ import com.google.common.base.Preconditions;
 import com.wonikrobotics.controller.ControlLever;
 import com.wonikrobotics.controller.ControlWheel;
 import com.wonikrobotics.controller.Joystick;
+import com.wonikrobotics.ros.AndroidNode;
+import com.wonikrobotics.ros.CustomPublisher;
 import com.wonikrobotics.ros.CustomRosActivity;
+import com.wonikrobotics.ros.CustomSubscriber;
 import com.wonikrobotics.views.Velocity_Display;
 
+import org.ros.address.InetAddressFactory;
+import org.ros.internal.message.Message;
+import org.ros.node.ConnectedNode;
+import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
+import org.ros.node.topic.Publisher;
+
+import geometry_msgs.Twist;
 
 /**
  * Created by Notebook on 2016-07-28.
@@ -46,11 +56,9 @@ public class RobotController extends CustomRosActivity {
     /** define views for display sensor data **/
     private ImageView camera;
 
-
     /** operated value for publish **/
     private float velocity;
     private float angular;
-
 
     /** base app views **/
     private TextView robotName;
@@ -70,7 +78,8 @@ public class RobotController extends CustomRosActivity {
         setLayout(RobotController.CONTROLLER_VERTICAL_RTHETA);
         Preconditions.checkNotNull(getIntent().getStringExtra("NAME"));
         Preconditions.checkNotNull(getIntent().getStringExtra("URL"));
-        setURI(getIntent().getStringExtra("NAME"),getIntent().getBooleanExtra("URL",false));
+        Preconditions.checkNotNull(getIntent().getBooleanExtra("MASTER",false));
+        setURI(getIntent().getStringExtra("URL"),getIntent().getBooleanExtra("MASTER",false));
     }
 
     /**
@@ -109,7 +118,7 @@ public class RobotController extends CustomRosActivity {
                          *  camera.setScaleType(ImageView.ScaleType.FIT_CENTER);
                          *  if(horizontalScroll.getWidth()>horizontalScroll.getHeight())
                          *      camera.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getHeight(),horizontalScroll.getHeight()));
-                         *  eles
+                         *  else
                          *      camera.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(),horizontalScroll.getWidth()));
                          *  innerScroll.addView(camera);
                          *
@@ -130,6 +139,16 @@ public class RobotController extends CustomRosActivity {
                             joystick = new Joystick(RobotController.this);
                             joystick.setAreaMovable(joystickArea);
                             joystickLayout.addView(joystick);
+                            joystick.setOnJoystickListener(new Joystick.JoystickListener() {
+                                @Override
+                                public void onMove(float angle, float angleDir, float acc, float accDir) {
+
+                                    RobotController.this.angular = angle / 90.0f * angleDir * accDir;
+                                    RobotController.this.velocity = acc / 100.0f * accDir;
+                                    velocityDisplayer.setVel((int)Math.abs(acc));
+
+                                }
+                            });
 
                         }else{
                             /*
@@ -203,6 +222,59 @@ public class RobotController extends CustomRosActivity {
 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
+        NodeConfiguration nodeConfiguration =
+                NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
+        nodeConfiguration.setMasterUri(getMasterUri());
 
-    }
+        CustomPublisher pSet = new CustomPublisher("mobile_base/commands/velocity",
+                geometry_msgs.Twist._TYPE, 100) {
+            @Override
+            public void publishingRoutine(Publisher publisher, ConnectedNode connectedNode) {
+
+                geometry_msgs.Twist veloPubData = connectedNode.
+                        getTopicMessageFactory().newFromType(Twist._TYPE);
+
+                veloPubData.getAngular().setZ(RobotController.this.angular);
+                veloPubData.getLinear().setX(RobotController.this.velocity);
+
+                veloPubData.getLinear().setY(2.0f);
+
+                publisher.publish(veloPubData);
+
+            }
+
+            @Override
+            public void onLoopClear(Publisher publisher, ConnectedNode connectedNode){
+
+                geometry_msgs.Twist veloPubData = connectedNode.
+                        getTopicMessageFactory().newFromType(Twist._TYPE);
+
+                veloPubData.getAngular().setZ(0.0f);
+                veloPubData.getLinear().setX(0.0f);
+
+                veloPubData.getLinear().setY(1.0f);
+
+                publisher.publish(veloPubData);
+
+            }
+
+        };
+
+        CustomSubscriber sSet = new CustomSubscriber("p1_sonar_1", sensor_msgs.Range._TYPE){
+            @Override
+            public void subscribingRoutine(Message message) {
+
+                sensor_msgs.Range msg = (sensor_msgs.Range)message;
+
+            }
+        };
+
+        AndroidNode androidNode = new AndroidNode();
+
+        androidNode.addSubscriber(sSet);
+        androidNode.addPublisher(pSet);
+
+        nodeMainExecutor.execute(androidNode, nodeConfiguration);
+
+   }
 }

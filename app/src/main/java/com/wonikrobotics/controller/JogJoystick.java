@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -86,6 +87,21 @@ public class JogJoystick extends ImageView{
 
         centerX = area.centerX();
         centerY = area.centerY();
+
+        int widthResized = areaMovable.width()/4;
+        int heightResized = areaMovable.height()/4;
+
+        //Layout size setting
+        this.setLayoutParams(new ViewGroup.LayoutParams(widthResized, heightResized));
+
+        this.setMinimumWidth(widthResized);
+        this.setMinimumHeight(heightResized);
+
+        this.setMaxWidth(widthResized);
+        this.setMaxHeight(heightResized);
+
+        invalidate();
+
     }
 
     public void changeColor(int color){
@@ -95,15 +111,12 @@ public class JogJoystick extends ImageView{
 
     }
 
-    protected void onDraw(Canvas c){
+    protected void onDraw(Canvas c) {
 
         super.onDraw(c);
 
-        Paint p = new Paint();
-        p.setColor(color);
-        p.setAntiAlias(true);
-
-        c.drawCircle(WIDTH /2, HEIGHT /2, 100, p);
+        Drawable joystickImage = getContext().getResources().getDrawable(R.drawable.ctr_thumb);
+        this.setImageDrawable(joystickImage);
 
     }
 

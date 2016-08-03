@@ -1,15 +1,19 @@
 package com.wonikrobotics.controller;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import com.wonikrobotics.mobilecontroller.R;
 
 import java.util.Vector;
 
@@ -23,8 +27,8 @@ public class SteerTypeJoystick extends ImageView {
     public static final float STOPPED = 0.0f;
     public static final float BACKWARD = -1.0f;
 
-    private final int WIDTH = 200;
-    private final int HEIGHT = 200;
+    private final int DEFAULT_WIDTH = 200;
+    private final int DEFAULT_HEIGHT = 200;
 
     private int color = Color.rgb(254, 196, 54);
 
@@ -82,6 +86,21 @@ public class SteerTypeJoystick extends ImageView {
 
         centerX = area.centerX();
         centerY = area.centerY();
+
+        int widthResized = areaMovable.width()/4;
+        int heightResized = areaMovable.height()/4;
+
+        //Layout size setting
+        this.setLayoutParams(new ViewGroup.LayoutParams(widthResized, heightResized));
+
+        this.setMinimumWidth(widthResized);
+        this.setMinimumHeight(heightResized);
+
+        this.setMaxWidth(widthResized);
+        this.setMaxHeight(heightResized);
+
+        invalidate();
+
     }
 
     public void changeColor(int color){
@@ -95,24 +114,21 @@ public class SteerTypeJoystick extends ImageView {
 
         super.onDraw(c);
 
-        Paint p = new Paint();
-        p.setColor(color);
-        p.setAntiAlias(true);
-
-        c.drawCircle(WIDTH /2, HEIGHT /2, 100, p);
+        Drawable joystickImage = getContext().getResources().getDrawable(R.drawable.ctr_thumb);
+        this.setImageDrawable(joystickImage);
 
     }
 
     private void initSettings(Context context) {
 
         //Layout size setting
-        this.setLayoutParams(new ViewGroup.LayoutParams(WIDTH, HEIGHT));
+        this.setLayoutParams(new ViewGroup.LayoutParams(DEFAULT_WIDTH, DEFAULT_HEIGHT));
 
-        this.setMinimumWidth(WIDTH);
-        this.setMinimumHeight(HEIGHT);
+        this.setMinimumWidth(DEFAULT_WIDTH);
+        this.setMinimumHeight(DEFAULT_HEIGHT);
 
-        this.setMaxWidth(WIDTH);
-        this.setMaxHeight(HEIGHT);
+        this.setMaxWidth(DEFAULT_WIDTH);
+        this.setMaxHeight(DEFAULT_HEIGHT);
 
         //Touch event setting
         this.setOnTouchListener(new OnTouchListener(){
@@ -159,7 +175,7 @@ public class SteerTypeJoystick extends ImageView {
                             float maxTranslateX = (float)(maximumPoints.elementAt(0) - centerX);
                             float maxTranslateY = (float)(maximumPoints.elementAt(1) - centerY);
 
-                            acc = Math.abs((maxTranslateY / (areaMovable.height() / 2 - HEIGHT / 2))
+                            acc = Math.abs((maxTranslateY / (areaMovable.height() / 2 - DEFAULT_HEIGHT / 2))
                                     * 100.0f);
 
                             //Calculate angle
@@ -297,7 +313,7 @@ public class SteerTypeJoystick extends ImageView {
 
         double distance = Math.sqrt(Math.pow(dx, 2.0d) + Math.pow(dy, 2.0d));
 
-        if(distance < areaMovable.height() / 2 - HEIGHT / 2) {
+        if(distance < areaMovable.height() / 2 - DEFAULT_HEIGHT / 2) {
 
             acc = (float)Math.abs(centerY - pY) / (areaMovable.height() / 2) * 100.0f;
             return true;
@@ -320,7 +336,7 @@ public class SteerTypeJoystick extends ImageView {
         double dy = y - centerY;
 
         double radian = Math.atan2(dy, dx);
-        double radius = (areaMovable.height()/2 - HEIGHT /2);
+        double radius = (areaMovable.height()/2 - DEFAULT_HEIGHT /2);
 
         result.add(centerX + Math.cos(radian) * radius);
         result.add(centerY + Math.sin(radian) * radius);

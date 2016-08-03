@@ -29,7 +29,6 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
 
     private static final String TAG = "NodeMainExecutorService";
 
-
     static final String ACTION_START = "com.wonikrobotics.ros.ACTION_START_NODE_RUNNER_SERVICE";
     static final String ACTION_SHUTDOWN = "com.wonikrobotics.ros.ACTION_SHUTDOWN_NODE_RUNNER_SERVICE";
 
@@ -63,7 +62,7 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
 
     @Override
     public void onCreate() {
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        PowerManager powerManager = (PowerManager)getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         wakeLock.acquire();
         int wifiLockType = WifiManager.WIFI_MODE_FULL;
@@ -80,8 +79,8 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
 
     @Override
     public void execute(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
-                        Collection<NodeListener> nodeListeneners) {
-        nodeMainExecutor.execute(nodeMain, nodeConfiguration, nodeListeneners);
+                        Collection<NodeListener> nodeListeners) {
+        nodeMainExecutor.execute(nodeMain, nodeConfiguration, nodeListeners);
     }
 
     @Override
@@ -127,8 +126,6 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
     public void addListener(CustomNodeMainExecutorServiceListener listener) {
         listeners.add(listener);
     }
-
-
 
     private void signalOnShutdown() throws org.ros.internal.node.xmlrpc.XmlRpcTimeoutException {
         listeners.signal(new SignalRunnable<CustomNodeMainExecutorServiceListener>() {

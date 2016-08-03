@@ -13,12 +13,12 @@ import android.view.View;
 /**
  * Created by Notebook on 2016-07-13.
  */
-public class Velocity_Display extends View {
+public class VelocityDisplay extends View {
     int vel = 100;
     Shader shader;
     Paint grad;
     RectF rf;
-    public Velocity_Display(Context c){
+    public VelocityDisplay(Context c){
         super(c);
     }
     public void setVel(int pa){

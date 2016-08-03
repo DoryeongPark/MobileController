@@ -17,10 +17,7 @@ import com.wonikrobotics.mobilecontroller.R;
 
 import java.util.Vector;
 
-/**
- * Created by Felix on 2016-06-24.
- */
-public class Joystick extends ImageView {
+public class JogJoystick extends ImageView{
 
     public static final float LEFT = 1.0f;
     public static final float CENTER = 0.0f;
@@ -58,25 +55,25 @@ public class Joystick extends ImageView {
 
     public interface JoystickListener{
 
-        public void onMove(float angle, float angleDir, float acc, float accDir);
+        public void onMove(float dataAngular, float dataLinear);
 
     }
 
-    public Joystick(Context context){
+    public JogJoystick(Context context){
 
         super(context);
         initSettings(context);
 
     }
 
-    public Joystick(Context context, AttributeSet attrs) {
+    public JogJoystick(Context context, AttributeSet attrs) {
 
         super(context, attrs);
         initSettings(context);
 
     }
 
-    public Joystick(Context context, AttributeSet attrs, int defStyle) {
+    public JogJoystick(Context context, AttributeSet attrs, int defStyle) {
 
         super(context, attrs, defStyle);
         initSettings(context);
@@ -105,10 +102,8 @@ public class Joystick extends ImageView {
         Paint p = new Paint();
         p.setColor(color);
         p.setAntiAlias(true);
-        Bitmap rawImage=BitmapFactory.decodeResource(getResources(), R.drawable.ctr_thumb);
-        Bitmap scaleImage = Bitmap.createScaledBitmap(rawImage,200,200,false);
-        c.drawBitmap(scaleImage,(c.getWidth()/2)-100,(c.getHeight()/2)-100,null);
 
+        c.drawCircle(WIDTH /2, HEIGHT /2, 100, p);
 
     }
 
@@ -144,8 +139,8 @@ public class Joystick extends ImageView {
 
                         if(isInside(X, Y)) {
 
-                            Joystick.this.setTranslationX(translateX);
-                            Joystick.this.setTranslationY(translateY);
+                            JogJoystick.this.setTranslationX(translateX);
+                            JogJoystick.this.setTranslationY(translateY);
 
                             //Calculate angle
                             float angleCalculated = calculateAngle(X, Y);
@@ -156,10 +151,9 @@ public class Joystick extends ImageView {
 
                             //-- Set data to be sent
                             setData(angle, angleDir, acc, accDir);
-                            parseData();
 
                             if(jl != null)
-                                jl.onMove(angle, angleDir, acc, accDir);
+                                jl.onMove(dataAngular, dataLinear);
 
                         }else{
 
@@ -168,9 +162,6 @@ public class Joystick extends ImageView {
                             float maxTranslateX = (float)(maximumPoints.elementAt(0) - centerX);
                             float maxTranslateY = (float)(maximumPoints.elementAt(1) - centerY);
 
-                            acc = Math.abs((maxTranslateY / (areaMovable.height() / 2 - HEIGHT / 2))
-                                    * 100.0f);
-
                             //Calculate angle
                             float angleCalculated = calculateAngle(X, Y);
                             angle = parseAngle(translateX, translateY, angleCalculated);
@@ -178,15 +169,16 @@ public class Joystick extends ImageView {
                             angleDir = determineAngleDir(maxTranslateX);
                             accDir = determineAccDir(maxTranslateY);
 
-                            Joystick.this.setTranslationX(maxTranslateX);
-                            Joystick.this.setTranslationY(maxTranslateY);
+                            acc = 100.0f;
+
+                            JogJoystick.this.setTranslationX(maxTranslateX);
+                            JogJoystick.this.setTranslationY(maxTranslateY);
 
                             //-- Set data to be sent
                             setData(angle, angleDir, acc, accDir);
-                            parseData();
 
                             if(jl != null)
-                                jl.onMove(angle, angleDir, acc, accDir);
+                                jl.onMove(dataAngular, dataLinear);
 
                         }
 
@@ -194,8 +186,8 @@ public class Joystick extends ImageView {
 
                     case MotionEvent.ACTION_UP:
 
-                        Joystick.this.setTranslationX(0);
-                        Joystick.this.setTranslationY(0);
+                        JogJoystick.this.setTranslationX(0);
+                        JogJoystick.this.setTranslationY(0);
 
                         angleDir = CENTER;
                         angle = 0.0f;
@@ -204,10 +196,9 @@ public class Joystick extends ImageView {
                         acc = 0.0f;
 
                         setData(angle, angleDir, acc, accDir);
-                        parseData();
 
                         if(jl != null)
-                            jl.onMove(angle, angleDir, acc, accDir);
+                            jl.onMove(dataAngular, dataLinear);
 
                         break;
 
@@ -305,22 +296,15 @@ public class Joystick extends ImageView {
         double dy = pY - centerY;
 
         double distance = Math.sqrt(Math.pow(dx, 2.0d) + Math.pow(dy, 2.0d));
-        double radius = (areaMovable.height() / 2 - HEIGHT / 2);
+        double radius = (areaMovable.height()/2 - HEIGHT /2);
 
-        //acc = (float)(distance / radius * 100);
+        acc = (float)(distance / radius * 100);
 
-        if(distance < areaMovable.height() / 2 - HEIGHT / 2) {
-
-            acc = (float)Math.abs(centerY - pY) / (areaMovable.height() / 2) * 100.0f;
+        if(distance < areaMovable.height()/2 - HEIGHT /2)
             return true;
 
-        }
-
-        else {
-
+        else
             return false;
-
-        }
 
     }
 
@@ -344,9 +328,12 @@ public class Joystick extends ImageView {
     private void parseData(){
 
         float parsedDir = angleDir * accDir;
+        float parsedAWeight = (angularWeight * 0.5f) + 0.5f;
+        float parsedLWeight = (linearWeight * 0.5f) + 0.5f;
 
-        dataAngular = (angle / 90.0f) * parsedDir;
-        dataLinear = (acc / 100.0f) * accDir;
+        dataAngular = (angle / 90.0f) * parsedDir * parsedAWeight;
+        dataLinear = (acc / 100.0f) * accDir * parsedLWeight;
+
 
     }
 

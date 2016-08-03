@@ -37,7 +37,7 @@ public class UserOptionDialog extends Activity {
 
         }
     };
-    private TextView dblever,leverwheel,rtheta,ytheta , angulartxt,veltxt;
+    private TextView dblever,leverwheel,rtheta,ytheta,angulartxt,veltxt;
     private SeekBar angularbar,velbar;
     private int ctrSelected = 1;
     View.OnClickListener ctr_selector = new View.OnClickListener() {

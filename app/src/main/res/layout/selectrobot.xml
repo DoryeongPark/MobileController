@@ -2,46 +2,43 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="10"
+    android:background="#e6e6e6"
     android:orientation="vertical"
-    android:background="#e6e6e6">
+    android:weightSum="10">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:layout_weight="1"
+        android:background="#bdbdbe"
         android:orientation="vertical"
-        android:weightSum="4.5"
-        android:background="#bdbdbe">
+        android:weightSum="4.5">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="4"
+            android:background="#1b325f"
             android:orientation="horizontal"
-            android:weightSum="7"
-            android:background="#1b325f">
+            android:weightSum="7">
+
+            <View
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+            <TextView
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:gravity="center"
+                android:text="@string/app_name"
+                android:textColor="#ffffff"
+                android:textSize="10pt" />
             <ImageView
                 android:id="@+id/select_robot_add"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@drawable/add"
-                android:scaleType="fitCenter"/>
-            <TextView
-                android:layout_width="0px"
-                android:layout_height="match_parent"
-                android:layout_weight="5"
-                android:textColor="#ffffff"
-                android:gravity="center"
-                android:textSize="10pt"
-                android:text="@string/app_name"/>
-            <ImageView
-                android:id="@+id/select_robot_option"
-                android:layout_width="0px"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:padding="10dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/menu"/>
+                android:scaleType="fitCenter"
+                android:src="@drawable/add" />
         </LinearLayout>
 
     </LinearLayout>
@@ -49,31 +46,31 @@
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:layout_weight="3.9"
-        android:weightSum="5"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:weightSum="5">
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="0.9"
             android:gravity="center"
+            android:text="Available Robot List"
             android:textColor="#000000"
-            android:textSize="8pt"
-            android:text="Available Robot List"/>
+            android:textSize="8pt" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="4"
-            android:weightSum="6"
             android:gravity="center_horizontal"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:weightSum="6">
             <ListView
                 android:id="@+id/availablerobotlist"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight="5"
-                android:dividerHeight="10dp"
-                android:divider="#00ffffff"
                 android:background="@drawable/roundshape"
+                android:divider="#00ffffff"
+                android:dividerHeight="10dp"
                 android:listSelector="@drawable/robotlistselector">
 
             </ListView>
@@ -83,23 +80,23 @@
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:layout_weight="3.9"
-        android:weightSum="5"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:weightSum="5">
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="0.9"
             android:gravity="center"
+            android:text="Selected Robot Info"
             android:textColor="#000000"
-            android:textSize="8pt"
-            android:text="Selected Robot Info"/>
+            android:textSize="8pt" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="4"
-            android:weightSum="6"
             android:gravity="center_horizontal"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:weightSum="6">
             <LinearLayout
                 android:layout_width="0px"
                 android:layout_height="match_parent"
@@ -116,9 +113,9 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center_vertical|right"
+                        android:text="Robot Name"
                         android:textColor="#000000"
-                        android:textSize="7pt"
-                        android:text="Robot Name"/>
+                        android:textSize="7pt" />
                     <View
                         android:layout_width="0px"
                         android:layout_height="match_parent"
@@ -142,9 +139,9 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center_vertical|right"
+                        android:text="Master URL"
                         android:textColor="#000000"
-                        android:textSize="7pt"
-                        android:text="Master URL"/>
+                        android:textSize="7pt" />
                     <View
                         android:layout_width="0px"
                         android:layout_height="match_parent"
@@ -168,9 +165,9 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center_vertical|right"
+                        android:text="Sensor Info"
                         android:textColor="#000000"
-                        android:textSize="7pt"
-                        android:text="Sensor Info"/>
+                        android:textSize="7pt" />
                     <View
                         android:layout_width="0px"
                         android:layout_height="match_parent"
@@ -197,21 +194,21 @@
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:layout_weight="0.8"
-        android:weightSum="10"
         android:gravity="center"
         android:orientation="horizontal"
         android:paddingBottom="5dp"
-        android:paddingTop="5dp">
+        android:paddingTop="5dp"
+        android:weightSum="10">
         <TextView
             android:id="@+id/btnConnect"
             android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="6"
-            android:textColor="#ffffff"
-            android:textSize="10pt"
-            android:text="C o n n e c t "
+            android:background="@drawable/btnbackground"
             android:gravity="center"
-            android:background="@drawable/btnbackground"/>
+            android:text="C o n n e c t "
+            android:textColor="#ffffff"
+            android:textSize="10pt" />
 
     </LinearLayout>
 </LinearLayout>

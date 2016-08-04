@@ -67,6 +67,7 @@ public abstract class CustomRosActivity  extends Activity {
 
     private void startNodeMainExecutorService() {
         this.STATE = STATE_CONNECTING;
+        onStateChangeListener(STATE);
         Intent intent = new Intent(this, CustomNodeMainExecutorService.class);
         intent.setAction(CustomNodeMainExecutorService.ACTION_START);
         startService(intent);
@@ -87,6 +88,7 @@ public abstract class CustomRosActivity  extends Activity {
                     protected void onPreExecute() {
                         super.onPreExecute();
                         STATE = STATE_UNREGISTERING;
+                        onStateChangeListener(STATE);
                     }
 
                     @Override
@@ -99,6 +101,7 @@ public abstract class CustomRosActivity  extends Activity {
                     protected void onPostExecute(Void result) {
                         super.onPostExecute(result);
                         STATE = STATE_DISCONNECTED;
+                        onStateChangeListener(STATE);
                     }
                 };
                 task.execute();
@@ -114,7 +117,7 @@ public abstract class CustomRosActivity  extends Activity {
     protected void onResume() {
         super.onResume();
         Log.e("resume pause state", String.valueOf(PAUSE_STATE));
-        PAUSE_STATE = PAUSE_WITH_STOP;
+        setPAUSE_STATE(PAUSE_WITH_STOP);
         if (STATE == STATE_UNREGISTERING) {
             Toast.makeText(this, "steel unregistering on master", Toast.LENGTH_SHORT).show();
             finish();
@@ -154,6 +157,8 @@ public abstract class CustomRosActivity  extends Activity {
      *          the {@link NodeMainExecutor} created for this {@link Activity}
      */
     protected abstract void init(NodeMainExecutor nodeMainExecutor);
+
+    protected abstract void onStateChangeListener(int state);
 
     public URI getMasterUri() {
         Preconditions.checkNotNull(nodeMainExecutorService);
@@ -200,6 +205,7 @@ public abstract class CustomRosActivity  extends Activity {
                 }
             }.execute();
             STATE = STATE_CONNECTED;
+            onStateChangeListener(STATE);
         }
 
         @Override
@@ -207,6 +213,7 @@ public abstract class CustomRosActivity  extends Activity {
             Log.e("service disconnected", name.toString());
             serviceConnection = false;
             STATE = STATE_DISCONNECTED;
+            onStateChangeListener(STATE);
         }
     }
 

@@ -11,22 +11,25 @@ import android.view.View;
 /**
  * Created by Felix on 2016-08-03.
  */
-public class SSensorView extends View {
+public class SonarSensorView extends View {
+    final int FRONT_N_BEHIND = 1;
     float cX,cY;
     Paint red,green;
     float max_val = 5;
-    final int FRONT_N_BEHIND = 1;
     //    back;
     float[] valuelist;
-    public SSensorView(Context c, float[] values){
+
+    public SonarSensorView(Context c, float[] values) {
         super(c);
         initPaint();
         this.valuelist = values;
     }
-    public SSensorView(Context c, AttributeSet set){
+
+    public SonarSensorView(Context c, AttributeSet set) {
         super(c,set);
     }
-    public SSensorView(Context c, AttributeSet set , int defaultStyle){
+
+    public SonarSensorView(Context c, AttributeSet set, int defaultStyle) {
         super(c,set,defaultStyle);
     }
     public void setMaxval(float val){

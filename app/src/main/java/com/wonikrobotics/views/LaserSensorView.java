@@ -16,19 +16,20 @@ import android.view.View;
 /**
  * Created by Notebook on 2016-07-13.
  */
-public abstract class LSensorView extends View{
+public abstract class LaserSensorView extends View {
+    sensor_msgs.LaserScan scan_msg;
+    PointF near = null;
+    RectF rf = null;
+    float max_val = 0;
+    float width, height;
     private boolean mode = false;
     private float old_dist = 1f;
     private Paint paint = new Paint();
     private Paint back = new Paint();
     private Paint line = new Paint();
     private Paint red = new Paint();
-    sensor_msgs.LaserScan scan_msg;
-    PointF near = null;
-    RectF rf = null;
-    float max_val = 0;
-    float width,height;
-    public LSensorView(Context c){
+
+    public LaserSensorView(Context c) {
         super(c);
         paint.setColor(Color.BLACK);
         paint.setTextSize(40f);

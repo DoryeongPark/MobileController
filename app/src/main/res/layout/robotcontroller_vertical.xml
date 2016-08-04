@@ -81,6 +81,7 @@
                     android:orientation="horizontal"
                     android:weightSum="1">
                     <ImageView
+                        android:id="@+id/horizontalLeftArrow"
                         android:layout_width="0px"
                         android:layout_height="match_parent"
                         android:layout_weight="0.1"
@@ -96,6 +97,7 @@
 
                     </HorizontalScrollView>
                     <ImageView
+                        android:id="@+id/horizontalRightArrow"
                         android:layout_width="0px"
                         android:layout_height="match_parent"
                         android:layout_weight="0.1"

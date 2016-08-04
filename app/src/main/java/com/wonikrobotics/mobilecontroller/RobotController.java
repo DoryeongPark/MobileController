@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -75,6 +76,10 @@ public class RobotController extends CustomRosActivity {
     private CameraView cameraView;
     private ImageView connectionState;
 
+    private ImageView verticalLeftArrow;
+    private ImageView verticalRightArrow;
+    private ImageView horizontalLeftArrow;
+    private ImageView horizontalRightArrow;
 
     /** operated value for publish **/
     private float velocity;
@@ -129,7 +134,8 @@ public class RobotController extends CustomRosActivity {
                             break;
                     }
                     break;
-                /* ui change associated with subscriber data
+                /*
+                    ui change associated with subscriber data
                     0 - camera, 1 - sonar, 2 - laser, 3 - map
                  */
                 case 1:
@@ -137,6 +143,7 @@ public class RobotController extends CustomRosActivity {
                         cameraView.update((Bitmap) msg.obj);
                     } else if (msg.arg1 == 1) {
                         sonarView.update(sonarValues);
+                        System.out.println();
                     } else if (msg.arg1 == 2) {
                         laserView.update((sensor_msgs.LaserScan) msg.obj);
                     }
@@ -177,8 +184,68 @@ public class RobotController extends CustomRosActivity {
             sonarValues[i] = 0.0f;
     }
 
+    private void addEventForHorrizontalArrows(){
+        horizontalLeftArrow.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                int viewPoint = innerScroll.getWidth();
+                int currentPoint = horizontalScroll.getScrollX();
+                for(int i = 0; i < innerScroll.getChildCount(); ++i){
+                    viewPoint = viewPoint - horizontalScroll.getWidth();
+                    if(viewPoint < currentPoint){
+                        horizontalScroll.smoothScrollTo(viewPoint, 0);
+                        break;
+                    }
+                }
+            }
+        });
+        horizontalRightArrow.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                int viewPoint = 0;
+                int currentPoint = horizontalScroll.getScrollX();
+                for(int i = 0; i < innerScroll.getChildCount(); ++i){
+                    if(viewPoint > currentPoint) {
+                        horizontalScroll.smoothScrollTo(viewPoint, 0);
+                        break;
+                    }
+                    viewPoint = viewPoint + horizontalScroll.getWidth();
+                }
+            }
+        });
+    }
 
+    private void addEventForVerticalArrows(){
+        verticalLeftArrow.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                int viewPoint = innerScroll.getHeight();
+                int currentPoint = verticalScroll.getScrollY();
+                for(int i = 0; i < innerScroll.getChildCount(); ++i){
+                    viewPoint = viewPoint - verticalScroll.getHeight();
+                    if(viewPoint < currentPoint){
+                        verticalScroll.smoothScrollTo(0, viewPoint);
+                        break;
+                    }
+                }
+            }
+        });
 
+        verticalRightArrow.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                int viewPoint = 0;
+                int currentPoint = verticalScroll.getScrollY();
+                for(int i = 0; i < innerScroll.getChildCount(); ++i){
+                    if(viewPoint > currentPoint){
+                        verticalScroll.smoothScrollTo(0, viewPoint);
+                        break;
+                    }
+                    viewPoint = viewPoint + verticalScroll.getHeight();
+                }
+            }
+        });
+    }
 
     /**
      * method for change layout
@@ -208,6 +275,8 @@ public class RobotController extends CustomRosActivity {
                 velocityDisplayer = new VelocityDisplay(RobotController.this);
                 robotNameTxt.setText(robotNameStr);
                 horizontalScroll = (HorizontalScrollView)findViewById(R.id.horizontalScroll);
+                horizontalLeftArrow = (ImageView)findViewById(R.id.horizontalLeftArrow);
+                horizontalRightArrow = (ImageView)findViewById(R.id.horizontalRightArrow);
                 horizontalScroll.post(new Runnable() {
                     @Override
                     public void run() {
@@ -215,37 +284,18 @@ public class RobotController extends CustomRosActivity {
                         velocityDisplayLayout.addView(velocityDisplayer);
                         innerScroll = new LinearLayout(horizontalScroll.getContext());
                         innerScroll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                        /****
-                         *
-                         * * add Sensor Views on innerScroll but have to set measure of views
-                         *
-                         *
-                         * sample code for add camera view to innerScroll (camera view's scale is square)
-                         *
-                         *  camera = new ImageView(innerScroll.getContext());
-                         *  camera.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                         *  if(horizontalScroll.getWidth()>horizontalScroll.getHeight())
-                         *      camera.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getHeight(),horizontalScroll.getHeight()));
-                         *  else
-                         *      camera.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(),horizontalScroll.getWidth()));
-                         *  innerScroll.addView(camera);
-                         *
-                         *
-                         ****/
                         if(cameraView.getParent() !=null)
                             ((ViewGroup)cameraView.getParent()).removeAllViews();
                         cameraView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                        if(horizontalScroll.getWidth()>horizontalScroll.getHeight())
-                              cameraView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getHeight(),horizontalScroll.getHeight()));
-                        else
-                              cameraView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(),horizontalScroll.getWidth()));
+                        cameraView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
                         innerScroll.addView(cameraView);
-                            sonarView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(),horizontalScroll.getHeight()));
+                        sonarView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(),horizontalScroll.getHeight()));
                         innerScroll.addView(sonarView);
-                            laserView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(),horizontalScroll.getHeight()));
+                        laserView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(),horizontalScroll.getHeight()));
                         innerScroll.addView(laserView);
                         horizontalScroll.removeAllViews();
                         horizontalScroll.addView(innerScroll);
+                        addEventForHorrizontalArrows();
                         Rect joystickArea = new Rect();
                         joystickLayout.getGlobalVisibleRect(joystickArea);
                         if(joystickLayout.getWidth() > joystickLayout.getHeight()){
@@ -309,6 +359,8 @@ public class RobotController extends CustomRosActivity {
                 connectionState = (ImageView) findViewById(R.id.connection_state);
                 velocityDisplayer = new VelocityDisplay(RobotController.this);
                 verticalScroll = (ScrollView)findViewById(R.id.verticalScroll);
+                verticalLeftArrow = (ImageView)findViewById(R.id.verticalLeftArrow);
+                verticalRightArrow = (ImageView)findViewById(R.id.verticalRightArrow);
                 verticalScroll.post(new Runnable(){
                     @Override
                     public void run() {
@@ -316,13 +368,10 @@ public class RobotController extends CustomRosActivity {
                         velocityDisplayLayout.addView(velocityDisplayer);
                         innerScroll = new LinearLayout(verticalScroll.getContext());
                         innerScroll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                        innerScroll.setOrientation(LinearLayout.VERTICAL);
                         if(cameraView.getParent() !=null)
                             ((ViewGroup)cameraView.getParent()).removeAllViews();
-                        cameraView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                        if(verticalScroll.getWidth()>verticalScroll.getHeight())
-                            cameraView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getHeight(),verticalScroll.getHeight()));
-                        else
-                            cameraView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(),verticalScroll.getWidth()));
+                        cameraView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(),verticalScroll.getHeight()));
                         innerScroll.addView(cameraView);
                         sonarView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(),verticalScroll.getHeight()));
                         innerScroll.addView(sonarView);
@@ -330,6 +379,7 @@ public class RobotController extends CustomRosActivity {
                         innerScroll.addView(laserView);
                         verticalScroll.removeAllViews();
                         verticalScroll.addView(innerScroll);
+                        addEventForVerticalArrows();
                         leftCtrLayout.removeAllViews();
                         rightCtrLayout.removeAllViews();
                         leftCtrLayout.addView(new ControlLever(RobotController.this) {
@@ -421,7 +471,7 @@ public class RobotController extends CustomRosActivity {
             @Override
             public void onError(Node node, Throwable throwable) {
                 super.onError(node, throwable);
-                Log.d("NodeExcutor", "onerror");
+                Log.d("NodeExecutor", "onerror");
                 android.os.Message msg = new android.os.Message();
                 msg.what = -1;
                 msg.arg1 = 1;

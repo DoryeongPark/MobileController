@@ -1,0 +1,344 @@
+Index: app/src/main/java/com/wonikrobotics/ros/CustomRosActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/wonikrobotics/ros/CustomRosActivity.java	(revision 8dc78c9823d2d9fe22680b4cb73ac167b9e74d81)
++++ app/src/main/java/com/wonikrobotics/ros/CustomRosActivity.java	(revision )
+@@ -67,6 +67,7 @@
+ 
+     private void startNodeMainExecutorService() {
+         this.STATE = STATE_CONNECTING;
++        onStateChangeListener(STATE);
+         Intent intent = new Intent(this, CustomNodeMainExecutorService.class);
+         intent.setAction(CustomNodeMainExecutorService.ACTION_START);
+         startService(intent);
+@@ -87,6 +88,7 @@
+                     protected void onPreExecute() {
+                         super.onPreExecute();
+                         STATE = STATE_UNREGISTERING;
++                        onStateChangeListener(STATE);
+                     }
+ 
+                     @Override
+@@ -99,6 +101,7 @@
+                     protected void onPostExecute(Void result) {
+                         super.onPostExecute(result);
+                         STATE = STATE_DISCONNECTED;
++                        onStateChangeListener(STATE);
+                     }
+                 };
+                 task.execute();
+@@ -114,7 +117,7 @@
+     protected void onResume() {
+         super.onResume();
+         Log.e("resume pause state", String.valueOf(PAUSE_STATE));
+-        PAUSE_STATE = PAUSE_WITH_STOP;
++        setPAUSE_STATE(PAUSE_WITH_STOP);
+         if (STATE == STATE_UNREGISTERING) {
+             Toast.makeText(this, "steel unregistering on master", Toast.LENGTH_SHORT).show();
+             finish();
+@@ -154,6 +157,7 @@
+      *          the {@link NodeMainExecutor} created for this {@link Activity}
+      */
+     protected abstract void init(NodeMainExecutor nodeMainExecutor);
++    protected abstract void onStateChangeListener(int state);
+ 
+     public URI getMasterUri() {
+         Preconditions.checkNotNull(nodeMainExecutorService);
+@@ -200,6 +204,7 @@
+                 }
+             }.execute();
+             STATE = STATE_CONNECTED;
++            onStateChangeListener(STATE);
+         }
+ 
+         @Override
+@@ -207,6 +212,7 @@
+             Log.e("service disconnected", name.toString());
+             serviceConnection = false;
+             STATE = STATE_DISCONNECTED;
++            onStateChangeListener(STATE);
+         }
+     }
+ 
+\ No newline at end of file
+Index: app/src/main/res/layout/robotcontroller_vertical.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/robotcontroller_vertical.xml	(revision 8dc78c9823d2d9fe22680b4cb73ac167b9e74d81)
++++ app/src/main/res/layout/robotcontroller_vertical.xml	(revision )
+@@ -21,7 +21,15 @@
+             <View
+                 android:layout_width="0px"
+                 android:layout_height="match_parent"
+-                android:layout_weight="1"/>
++                android:layout_weight="0.5"/>
++            <ImageView
++                android:id="@+id/connection_state"
++                android:layout_width="0px"
++                android:layout_height="match_parent"
++                android:layout_weight="0.5"
++                android:scaleType="fitCenter"
++                android:src="@drawable/disconnected"/>
++
+             <TextView
+                 android:id="@+id/controllerRobotName"
+                 android:layout_width="0px"
+Index: app/src/main/res/layout/robotcontroller_horizontal.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/robotcontroller_horizontal.xml	(revision 8dc78c9823d2d9fe22680b4cb73ac167b9e74d81)
++++ app/src/main/res/layout/robotcontroller_horizontal.xml	(revision )
+@@ -21,7 +21,15 @@
+             <View
+                 android:layout_width="0px"
+                 android:layout_height="match_parent"
+-                android:layout_weight="1"/>
++                android:layout_weight="0.5"/>
++            <ImageView
++                android:id="@+id/connection_state"
++                android:layout_width="0px"
++                android:layout_height="match_parent"
++                android:layout_weight="0.5"
++                android:scaleType="fitCenter"
++                android:src="@drawable/disconnected"/>
++
+             <TextView
+                 android:id="@+id/controllerRobotName"
+                 android:layout_width="0px"
+Index: app/src/main/java/com/wonikrobotics/mobilecontroller/RobotController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/wonikrobotics/mobilecontroller/RobotController.java	(revision 8dc78c9823d2d9fe22680b4cb73ac167b9e74d81)
++++ app/src/main/java/com/wonikrobotics/mobilecontroller/RobotController.java	(revision )
+@@ -5,6 +5,8 @@
+ import android.database.Cursor;
+ import android.graphics.Rect;
+ import android.os.Bundle;
++import android.os.Handler;
++import android.util.Log;
+ import android.view.View;
+ import android.view.ViewGroup;
+ import android.widget.HorizontalScrollView;
+@@ -28,6 +30,7 @@
+ import org.ros.address.InetAddressFactory;
+ import org.ros.internal.message.Message;
+ import org.ros.node.ConnectedNode;
++import org.ros.node.Node;
+ import org.ros.node.NodeConfiguration;
+ import org.ros.node.NodeMainExecutor;
+ import org.ros.node.topic.Publisher;
+@@ -59,6 +62,7 @@
+ 
+     /** define views for display sensor data **/
+     private ImageView camera;
++    private ImageView connectionState;
+ 
+     /** operated value for publish **/
+     private float velocity;
+@@ -75,7 +79,7 @@
+             setPAUSE_STATE(PAUSE_WITHOUT_STOP);
+             Intent userOptionDialog = new Intent(RobotController.this, UserOptionDialog.class);
+             userOptionDialog.putExtra("IDX", idx);
+-            startActivityForResult(userOptionDialog, 0);
++            startActivityForResult(userOptionDialog,1);
+         }
+     };
+ 
+@@ -91,16 +95,16 @@
+     @Override
+     protected void onResume() {
+         super.onResume();
++        Intent instance = getIntent();
+ 
+-        Preconditions.checkNotNull(getIntent().getStringExtra("NAME"));
+-        Preconditions.checkNotNull(getIntent().getStringExtra("URL"));
+-        Preconditions.checkNotNull(getIntent().getBooleanExtra("MASTER",false));
+-        Preconditions.checkNotNull(getIntent().getIntExtra("IDX", -1));
+-        robotNameStr = getIntent().getStringExtra("NAME");
+-        idx = getIntent().getIntExtra("IDX", -1);
++        if(instance.hasExtra("NAME"))
++            robotNameStr = instance.getStringExtra("NAME");
++        if(instance.hasExtra("IDX"))
++            idx = instance.getIntExtra("IDX", -1);
+         getUserOption(getIntent().getIntExtra("IDX", -1));
+         setLayout(currentSelectedController);
++        if(instance.hasExtra("URL")&&instance.hasExtra("MASTER"))
+-        setURI(getIntent().getStringExtra("URL"),getIntent().getBooleanExtra("MASTER",false));
++            setURI(getIntent().getStringExtra("URL"),getIntent().getBooleanExtra("MASTER",false));
+     }
+ 
+     /**
+@@ -110,6 +114,8 @@
+      */
+     private void setLayout(final int flag){
+         innerScroll = new LinearLayout(RobotController.this);
++        Log.e("roborctr","set don't stop");
++        setPAUSE_STATE(PAUSE_WITHOUT_STOP);
+         switch(flag){
+             case RobotController.CONTROLLER_VERTICAL_RTHETA:
+             case RobotController.CONTROLLER_VERTICAL_YTHETA:
+@@ -118,6 +124,7 @@
+                 robotNameTxt = (TextView) findViewById(R.id.controllerRobotName);
+                 userOption = (ImageView)findViewById(R.id.controllerUserOption);
+                 userOption.setOnClickListener(optionClickListener);
++                connectionState = (ImageView)findViewById(R.id.connection_state);
+                 velocityDisplayLayout = (LinearLayout) findViewById(R.id.velocity_display_layout);//textview for display velocity
+                 joystickLayout = (LinearLayout)findViewById(R.id.robotController_joystickLayout);
+                 velocityDisplayer = new Velocity_Display(RobotController.this);
+@@ -126,7 +133,7 @@
+                 horizontalScroll.post(new Runnable() {
+                     @Override
+                     public void run() {
+-                        setPAUSE_STATE(PAUSE_WITHOUT_STOP);
++
+                         velocityDisplayLayout.removeAllViews();
+                         velocityDisplayLayout.addView(velocityDisplayer);
+                         innerScroll = new LinearLayout(horizontalScroll.getContext());
+@@ -185,20 +192,22 @@
+                             *
+                              */
+                         }
+-                        setPAUSE_STATE(PAUSE_WITH_STOP);
++
+                     }
+ 
+                 });
++
+                 break;
+             case RobotController.CONTROLLER_HORIZONTAL_STEER:
+             case RobotController.CONTROLLER_HORIZONTAL_DOUBLELEVER:
+-                setPAUSE_STATE(PAUSE_WITHOUT_STOP);
++
+                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+                 setContentView(R.layout.robotcontroller_horizontal);
+                 robotNameTxt = (TextView) findViewById(R.id.controllerRobotName);
+                 velocityDisplayLayout = (LinearLayout)findViewById(R.id.velocity_display_layout);
+                 leftCtrLayout = (LinearLayout)findViewById(R.id.left_control_layout);
+                 rightCtrLayout = (LinearLayout)findViewById(R.id.right_control_layout);
++                connectionState = (ImageView)findViewById(R.id.connection_state);
+                 robotNameTxt.setText(robotNameStr);
+                 userOption = (ImageView)findViewById(R.id.controllerUserOption);
+                 userOption.setOnClickListener(optionClickListener);
+@@ -239,13 +248,14 @@
+                                 }
+                             });
+                         }
+-                        setPAUSE_STATE(PAUSE_WITH_STOP);
++
+                     }
+                 });
+                 break;
+             default:
+                 break;
+         }
++
+     }
+ 
+     private void getUserOption(int idx) {
+@@ -276,8 +286,46 @@
+         mDbOpenHelper = null;
+ 
+     }
++
+     @Override
++    protected void onStateChangeListener(int state) {
++        switch(state){
++            case STATE_CONNECTED:
++                connectionState.setImageResource(R.drawable.connected);
++                break;
++            case STATE_CONNECTING:
++                connectionState.setImageResource(R.drawable.connecting);
++                break;
++            case STATE_DISCONNECTED:
++                connectionState.setImageResource(R.drawable.disconnected);
++                break;
++            case STATE_UNREGISTERING:
++                connectionState.setImageResource(R.drawable.disconnecting);
++                break;
++        }
++    }
++    private Handler handler = new Handler(){
++        @Override
++        public void handleMessage(android.os.Message msg) {
++            super.handleMessage(msg);
++            switch(msg.what){
++                case -1:                    //state change
++                    switch (msg.arg1){
++                        case 0:             //on connected node start
++                            connectionState.setImageResource(R.drawable.connected);
++                            break;
++                        case 1:             //on error occured
++                            connectionState.setImageResource(R.drawable.disconnecting);
++                            break;
++                    }
++                    break;
++            }
++        }
++    };
++    @Override
+     protected void init(NodeMainExecutor nodeMainExecutor) {
++        Log.e("robotctr","set stop");
++        setPAUSE_STATE(PAUSE_WITH_STOP);
+         NodeConfiguration nodeConfiguration =
+                 NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
+         nodeConfiguration.setMasterUri(getMasterUri());
+@@ -326,21 +374,46 @@
+             }
+         };
+ 
+-        AndroidNode androidNode = new AndroidNode();
++        AndroidNode androidNode = new AndroidNode(){
++            @Override
++            public void onError(Node node, Throwable throwable) {
++                super.onError(node, throwable);
++                Log.d("NodeExcutor","onerror");
++                android.os.Message msg = new android.os.Message();
++                msg.what = -1;
++                msg.arg1 = 1;
++                msg.obj="Error Occured";
++                handler.sendMessage(msg);
++                try {
++                    node.shutdown();
++                }catch (org.ros.internal.node.xmlrpc.XmlRpcTimeoutException e){
++                    Log.e("exception","catch");
++                }
++            }
+ 
++            @Override
++            public void onStart(ConnectedNode connectedNode) {
++                android.os.Message msg = new android.os.Message();
++                msg.what = -1;
++                msg.arg1 = 0;
++                handler.sendMessage(msg);
++                super.onStart(connectedNode);
++            }
++        };
++
+         androidNode.addSubscriber(sSet);
+         androidNode.addPublisher(pSet);
+ 
++
+         nodeMainExecutor.execute(androidNode, nodeConfiguration);
+ 
+     }
+ 
+     @Override
+-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+-        if (resultCode == 0) {
++    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
++        super.onActivityResult(requestCode, resultCode, data);
++        if(resultCode == 1){
+             setPAUSE_STATE(PAUSE_WITHOUT_STOP);
+-            getUserOption(idx);
+-            setLayout(currentSelectedController);
+         }
+     }
+ }

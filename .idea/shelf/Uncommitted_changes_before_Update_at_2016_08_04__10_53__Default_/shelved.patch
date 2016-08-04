@@ -1,0 +1,16 @@
+Index: app/src/main/java/com/wonikrobotics/mobilecontroller/RobotController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/wonikrobotics/mobilecontroller/RobotController.java	(revision 135b10ef90365c54fb82825767cfdf6d33b9f772)
++++ app/src/main/java/com/wonikrobotics/mobilecontroller/RobotController.java	(revision )
+@@ -433,8 +433,6 @@
+     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+         if (resultCode == 0) {
+             setPAUSE_STATE(PAUSE_WITHOUT_STOP);
+-            getUserOption(idx);
+-            setLayout(currentSelectedController);
+         }
+     }
+ }

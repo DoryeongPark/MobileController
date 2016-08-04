@@ -1,0 +1,24 @@
+<changelist name="Uncommitted_changes_before_Update_at_2016_08_04__10_43__Default_" date="1470275011237" recycled="false">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2016_08_04__10_43__Default_/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before Update at 2016-08-04 오전 10:43 [Default]" />
+  <binary>
+    <option name="BEFORE_PATH" />
+    <option name="AFTER_PATH" value="app/src/main/res/drawable/connecting.png" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2016_08_04__10_43__Default_/connecting.png" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" />
+    <option name="AFTER_PATH" value="app/src/main/res/drawable/disconnected.png" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2016_08_04__10_43__Default_/disconnected.png" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" />
+    <option name="AFTER_PATH" value="app/src/main/res/drawable/connected.png" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2016_08_04__10_43__Default_/connected.png" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" />
+    <option name="AFTER_PATH" value="app/src/main/res/drawable/disconnecting.png" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2016_08_04__10_43__Default_/disconnecting.png" />
+  </binary>
+</changelist>

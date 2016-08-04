@@ -33,15 +33,11 @@ import com.wonikrobotics.views.VelocityDisplay;
 
 import org.ros.address.InetAddressFactory;
 import org.ros.android.BitmapFromCompressedImage;
-import org.ros.android.view.visualization.VisualizationView;
-import org.ros.android.view.visualization.layer.CameraControlLayer;
 import org.ros.internal.message.Message;
 import org.ros.node.ConnectedNode;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Publisher;
-
-import java.util.ArrayList;
 
 import geometry_msgs.Twist;
 
@@ -110,7 +106,7 @@ public class RobotController extends CustomRosActivity {
     protected void onResume() {
         super.onResume();
 
-        initViews();
+        initData();
         initHandler();
 
         Preconditions.checkNotNull(getIntent().getStringExtra("NAME"));
@@ -124,7 +120,7 @@ public class RobotController extends CustomRosActivity {
         setURI(getIntent().getStringExtra("URL"),getIntent().getBooleanExtra("MASTER",false));
     }
 
-    private void initViews(){
+    private void initData(){
         sonarValues = new float[8];
         for(int i = 0; i < 8; ++i)
             sonarValues[i] = 0.0f;
@@ -168,9 +164,7 @@ public class RobotController extends CustomRosActivity {
                 sonarView = new SSensorView(this, sonarValues);
                 laserView = new LSensorView(this){
                     @Override
-                    public void onMaxValChanged(float val) {
-
-                    }
+                    public void onMaxValChanged(float val) {}
                 };
                 cameraView = new CameraView(this);
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -269,6 +263,12 @@ public class RobotController extends CustomRosActivity {
                 break;
             case RobotController.CONTROLLER_HORIZONTAL_STEER:
             case RobotController.CONTROLLER_HORIZONTAL_DOUBLELEVER:
+                sonarView = new SSensorView(this, sonarValues);
+                laserView = new LSensorView(this){
+                    @Override
+                    public void onMaxValChanged(float val) {}
+                };
+                cameraView = new CameraView(this);
                 setPAUSE_STATE(PAUSE_WITHOUT_STOP);
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                 setContentView(R.layout.robotcontroller_horizontal);
@@ -288,6 +288,18 @@ public class RobotController extends CustomRosActivity {
                         velocityDisplayLayout.addView(velocityDisplayer);
                         innerScroll = new LinearLayout(verticalScroll.getContext());
                         innerScroll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                        if(cameraView.getParent() !=null)
+                            ((ViewGroup)cameraView.getParent()).removeAllViews();
+                        cameraView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                        if(verticalScroll.getWidth()>verticalScroll.getHeight())
+                            cameraView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getHeight(),verticalScroll.getHeight()));
+                        else
+                            cameraView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(),verticalScroll.getWidth()));
+                        innerScroll.addView(cameraView);
+                        sonarView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(),verticalScroll.getHeight()));
+                        innerScroll.addView(sonarView);
+                        laserView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(),verticalScroll.getHeight()));
+                        innerScroll.addView(laserView);
                         verticalScroll.removeAllViews();
                         verticalScroll.addView(innerScroll);
                         leftCtrLayout.removeAllViews();

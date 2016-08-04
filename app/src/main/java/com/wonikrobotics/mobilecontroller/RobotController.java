@@ -241,7 +241,6 @@ public class RobotController extends CustomRosActivity {
                             });
 
                         }else{
-
                             steerTypeJoystick = new SteerTypeJoystick(RobotController.this);
                             steerTypeJoystick.setAreaMovable(joystickArea);
                             steerTypeJoystick.setWeight(angSensitive, velSensitive);

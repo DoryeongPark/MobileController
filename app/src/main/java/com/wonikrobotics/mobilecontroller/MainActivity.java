@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import org.ros.android.RosActivity;
+
 public class MainActivity extends Activity {
     Handler handler;
     Runnable goOver = new Runnable() {
@@ -19,7 +21,6 @@ public class MainActivity extends Activity {
             finish();
         }
     };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,8 +31,6 @@ public class MainActivity extends Activity {
         robotics.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
         handler = new Handler();
         handler.postDelayed(goOver, 3000);
-
-
     }
 
     @Override

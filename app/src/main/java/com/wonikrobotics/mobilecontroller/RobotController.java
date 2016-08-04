@@ -3,8 +3,10 @@ package com.wonikrobotics.mobilecontroller;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
@@ -24,14 +26,22 @@ import com.wonikrobotics.ros.AndroidNode;
 import com.wonikrobotics.ros.CustomPublisher;
 import com.wonikrobotics.ros.CustomRosActivity;
 import com.wonikrobotics.ros.CustomSubscriber;
+import com.wonikrobotics.views.CameraView;
+import com.wonikrobotics.views.LSensorView;
+import com.wonikrobotics.views.SSensorView;
 import com.wonikrobotics.views.VelocityDisplay;
 
 import org.ros.address.InetAddressFactory;
+import org.ros.android.BitmapFromCompressedImage;
+import org.ros.android.view.visualization.VisualizationView;
+import org.ros.android.view.visualization.layer.CameraControlLayer;
 import org.ros.internal.message.Message;
 import org.ros.node.ConnectedNode;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Publisher;
+
+import java.util.ArrayList;
 
 import geometry_msgs.Twist;
 
@@ -60,7 +70,13 @@ public class RobotController extends CustomRosActivity {
     private float velSensitive,angSensitive;
 
     /** define views for display sensor data **/
-    private ImageView camera;
+    private float[] sonarValues;
+    private SSensorView sonarView;
+    private LSensorView laserView;
+    private CameraView cameraView;
+
+    /** handler **/
+    private Handler handler;
 
     /** operated value for publish **/
     private float velocity;
@@ -94,6 +110,9 @@ public class RobotController extends CustomRosActivity {
     protected void onResume() {
         super.onResume();
 
+        initViews();
+        initHandler();
+
         Preconditions.checkNotNull(getIntent().getStringExtra("NAME"));
         Preconditions.checkNotNull(getIntent().getStringExtra("URL"));
         Preconditions.checkNotNull(getIntent().getBooleanExtra("MASTER",false));
@@ -103,6 +122,37 @@ public class RobotController extends CustomRosActivity {
         getUserOption(getIntent().getIntExtra("IDX", -1));
         setLayout(currentSelectedController);
         setURI(getIntent().getStringExtra("URL"),getIntent().getBooleanExtra("MASTER",false));
+    }
+
+    private void initViews(){
+        sonarValues = new float[8];
+        for(int i = 0; i < 8; ++i)
+            sonarValues[i] = 0.0f;
+    }
+
+    private void initHandler(){
+        handler = new Handler(){
+            @Override
+            public void handleMessage(android.os.Message msg) {
+                switch(msg.what){
+                    /* ui change associated with connection */
+                    case 0:
+                        break;
+                    /* ui change associated with subscriber data
+                        0 - camera, 1 - sonar, 2 - laser, 3 - map
+                     */
+                    case 1:
+                        if(msg.arg1 == 0){
+                            cameraView.update((Bitmap)msg.obj);
+                        }else if(msg.arg1 == 1){
+                            sonarView.update(sonarValues);
+                        }else if(msg.arg1 == 2){
+                            laserView.update((sensor_msgs.LaserScan)msg.obj);
+                        }
+                        break;
+                }
+            }
+        };
     }
 
     /**
@@ -115,7 +165,14 @@ public class RobotController extends CustomRosActivity {
         switch(flag){
             case RobotController.CONTROLLER_VERTICAL_RTHETA:
             case RobotController.CONTROLLER_VERTICAL_YTHETA:
+                sonarView = new SSensorView(this, sonarValues);
+                laserView = new LSensorView(this){
+                    @Override
+                    public void onMaxValChanged(float val) {
 
+                    }
+                };
+                cameraView = new CameraView(this);
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 setContentView(R.layout.robotcontroller_vertical);
                 robotNameTxt = (TextView) findViewById(R.id.controllerRobotName);
@@ -151,6 +208,18 @@ public class RobotController extends CustomRosActivity {
                          *
                          *
                          ****/
+                        if(cameraView.getParent() !=null)
+                            ((ViewGroup)cameraView.getParent()).removeAllViews();
+                        cameraView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                        if(horizontalScroll.getWidth()>horizontalScroll.getHeight())
+                              cameraView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getHeight(),horizontalScroll.getHeight()));
+                        else
+                              cameraView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(),horizontalScroll.getWidth()));
+                        innerScroll.addView(cameraView);
+                            sonarView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(),horizontalScroll.getHeight()));
+                        innerScroll.addView(sonarView);
+                            laserView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(),horizontalScroll.getHeight()));
+                        innerScroll.addView(laserView);
                         horizontalScroll.removeAllViews();
                         horizontalScroll.addView(innerScroll);
                         Rect joystickArea = new Rect();
@@ -286,6 +355,7 @@ public class RobotController extends CustomRosActivity {
     }
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
+
         NodeConfiguration nodeConfiguration =
                 NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
         nodeConfiguration.setMasterUri(getMasterUri());
@@ -316,16 +386,17 @@ public class RobotController extends CustomRosActivity {
 
         androidNode.addPublisher(velocityPublisher);
 
-
         for(int i = 1 ; i < 9; ++i) {
+            final int in = i;
             CustomSubscriber sonarSubscriber = new CustomSubscriber("p1_sonar_" + String.valueOf(i),
                     sensor_msgs.Range._TYPE) {
                 @Override
                 public void subscribingRoutine(Message message) {
                     sensor_msgs.Range msg = (sensor_msgs.Range) message;
-                    /*
-                        Define what to do with msg
-                     */
+                    sonarValues[in-1] = msg.getRange();
+                    android.os.Message hdmsg = new android.os.Message();
+                    hdmsg.what = 1; hdmsg.arg1 = 1;
+                    handler.sendMessage(hdmsg);
                 }
             };
             androidNode.addSubscriber(sonarSubscriber);
@@ -335,12 +406,24 @@ public class RobotController extends CustomRosActivity {
             @Override
             public void subscribingRoutine(Message message) {
                 sensor_msgs.LaserScan msg = (sensor_msgs.LaserScan) message;
-                /*
-                    Define what to do with msg
-                 */
+                android.os.Message hdmsg = new android.os.Message();
+                hdmsg.what = 1; hdmsg.arg1 = 2; hdmsg.obj = msg;
+                handler.sendMessage(hdmsg);
             }
         };
         androidNode.addSubscriber(laserSubscriber);
+
+        CustomSubscriber cameraSubscriber = new CustomSubscriber("camera/rgb/image_raw/compressed", sensor_msgs.CompressedImage._TYPE){
+            @Override
+            public void subscribingRoutine(Message message) {
+                BitmapFromCompressedImage bfci = new BitmapFromCompressedImage();
+                Bitmap data = bfci.call((sensor_msgs.CompressedImage)message);
+                android.os.Message hdmsg = new android.os.Message();
+                hdmsg.what = 1; hdmsg.arg1 = 0; hdmsg.obj = data;
+                handler.sendMessage(hdmsg);
+            }
+        };
+        androidNode.addSubscriber(cameraSubscriber);
 
         nodeMainExecutor.execute(androidNode, nodeConfiguration);
 

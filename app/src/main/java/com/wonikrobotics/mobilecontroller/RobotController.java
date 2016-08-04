@@ -1,5 +1,7 @@
 package com.wonikrobotics.mobilecontroller;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
@@ -7,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
@@ -15,7 +18,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.google.common.base.Preconditions;
 import com.wonikrobotics.controller.ControlLever;
 import com.wonikrobotics.controller.ControlWheel;
 import com.wonikrobotics.controller.JogJoystick;
@@ -27,14 +29,15 @@ import com.wonikrobotics.ros.CustomPublisher;
 import com.wonikrobotics.ros.CustomRosActivity;
 import com.wonikrobotics.ros.CustomSubscriber;
 import com.wonikrobotics.views.CameraView;
-import com.wonikrobotics.views.LSensorView;
-import com.wonikrobotics.views.SSensorView;
+import com.wonikrobotics.views.LaserSensorView;
+import com.wonikrobotics.views.SonarSensorView;
 import com.wonikrobotics.views.VelocityDisplay;
 
 import org.ros.address.InetAddressFactory;
 import org.ros.android.BitmapFromCompressedImage;
 import org.ros.internal.message.Message;
 import org.ros.node.ConnectedNode;
+import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Publisher;
@@ -67,12 +70,11 @@ public class RobotController extends CustomRosActivity {
 
     /** define views for display sensor data **/
     private float[] sonarValues;
-    private SSensorView sonarView;
-    private LSensorView laserView;
+    private SonarSensorView sonarView;
+    private LaserSensorView laserView;
     private CameraView cameraView;
+    private ImageView connectionState;
 
-    /** handler **/
-    private Handler handler;
 
     /** operated value for publish **/
     private float velocity;
@@ -89,9 +91,60 @@ public class RobotController extends CustomRosActivity {
             setPAUSE_STATE(PAUSE_WITHOUT_STOP);
             Intent userOptionDialog = new Intent(RobotController.this, UserOptionDialog.class);
             userOptionDialog.putExtra("IDX", idx);
-            startActivityForResult(userOptionDialog, 0);
+            startActivityForResult(userOptionDialog, 1);
         }
     };
+
+    /**
+     * handler
+     **/
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(android.os.Message msg) {
+            switch (msg.what) {
+                /* ui change associated with connection */
+                case -1:                    //state change
+                    switch (msg.arg1) {
+                        case 0:             //on connected node start
+                            connectionState.setImageResource(R.drawable.connected);
+                            break;
+                        case 1:             //on error occured
+                            connectionState.setImageResource(R.drawable.disconnecting);
+                            this.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    connectionState.setImageResource(R.drawable.disconnected);
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(RobotController.this);
+                                    builder.setTitle("Connection Failed").setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                        @Override
+                                        public void onDismiss(DialogInterface dialog) {
+                                            finish();
+                                        }
+                                    });
+                                    builder.setMessage("Check the network state");
+                                    builder.create();
+                                    builder.show();
+                                }
+                            }, 2000);
+                            break;
+                    }
+                    break;
+                /* ui change associated with subscriber data
+                    0 - camera, 1 - sonar, 2 - laser, 3 - map
+                 */
+                case 1:
+                    if (msg.arg1 == 0) {
+                        cameraView.update((Bitmap) msg.obj);
+                    } else if (msg.arg1 == 1) {
+                        sonarView.update(sonarValues);
+                    } else if (msg.arg1 == 2) {
+                        laserView.update((sensor_msgs.LaserScan) msg.obj);
+                    }
+                    break;
+            }
+        }
+    };
+
 
 
     public RobotController(){ }
@@ -107,17 +160,15 @@ public class RobotController extends CustomRosActivity {
         super.onResume();
 
         initData();
-        initHandler();
-
-        Preconditions.checkNotNull(getIntent().getStringExtra("NAME"));
-        Preconditions.checkNotNull(getIntent().getStringExtra("URL"));
-        Preconditions.checkNotNull(getIntent().getBooleanExtra("MASTER",false));
-        Preconditions.checkNotNull(getIntent().getIntExtra("IDX", -1));
-        robotNameStr = getIntent().getStringExtra("NAME");
-        idx = getIntent().getIntExtra("IDX", -1);
+        Intent instance = getIntent();
+        if (instance.hasExtra("NAME"))
+            robotNameStr = instance.getStringExtra("NAME");
+        if (instance.hasExtra("IDX"))
+            idx = instance.getIntExtra("IDX", -1);
         getUserOption(getIntent().getIntExtra("IDX", -1));
         setLayout(currentSelectedController);
-        setURI(getIntent().getStringExtra("URL"),getIntent().getBooleanExtra("MASTER",false));
+        if (instance.hasExtra("URL") && instance.hasExtra("MASTER"))
+            setURI(getIntent().getStringExtra("URL"), getIntent().getBooleanExtra("MASTER",false));
     }
 
     private void initData(){
@@ -126,30 +177,8 @@ public class RobotController extends CustomRosActivity {
             sonarValues[i] = 0.0f;
     }
 
-    private void initHandler(){
-        handler = new Handler(){
-            @Override
-            public void handleMessage(android.os.Message msg) {
-                switch(msg.what){
-                    /* ui change associated with connection */
-                    case 0:
-                        break;
-                    /* ui change associated with subscriber data
-                        0 - camera, 1 - sonar, 2 - laser, 3 - map
-                     */
-                    case 1:
-                        if(msg.arg1 == 0){
-                            cameraView.update((Bitmap)msg.obj);
-                        }else if(msg.arg1 == 1){
-                            sonarView.update(sonarValues);
-                        }else if(msg.arg1 == 2){
-                            laserView.update((sensor_msgs.LaserScan)msg.obj);
-                        }
-                        break;
-                }
-            }
-        };
-    }
+
+
 
     /**
      * method for change layout
@@ -158,11 +187,12 @@ public class RobotController extends CustomRosActivity {
      */
     private void setLayout(final int flag){
         innerScroll = new LinearLayout(RobotController.this);
+        setPAUSE_STATE(PAUSE_WITHOUT_STOP);
         switch(flag){
             case RobotController.CONTROLLER_VERTICAL_RTHETA:
             case RobotController.CONTROLLER_VERTICAL_YTHETA:
-                sonarView = new SSensorView(this, sonarValues);
-                laserView = new LSensorView(this){
+                sonarView = new SonarSensorView(this, sonarValues);
+                laserView = new LaserSensorView(this){
                     @Override
                     public void onMaxValChanged(float val) {}
                 };
@@ -172,6 +202,7 @@ public class RobotController extends CustomRosActivity {
                 robotNameTxt = (TextView) findViewById(R.id.controllerRobotName);
                 userOption = (ImageView)findViewById(R.id.controllerUserOption);
                 userOption.setOnClickListener(optionClickListener);
+                connectionState = (ImageView) findViewById(R.id.connection_state);
                 velocityDisplayLayout = (LinearLayout) findViewById(R.id.velocity_display_layout);//textview for display velocity
                 joystickLayout = (LinearLayout)findViewById(R.id.robotController_joystickLayout);
                 velocityDisplayer = new VelocityDisplay(RobotController.this);
@@ -180,7 +211,6 @@ public class RobotController extends CustomRosActivity {
                 horizontalScroll.post(new Runnable() {
                     @Override
                     public void run() {
-                        setPAUSE_STATE(PAUSE_WITHOUT_STOP);
                         velocityDisplayLayout.removeAllViews();
                         velocityDisplayLayout.addView(velocityDisplayer);
                         innerScroll = new LinearLayout(horizontalScroll.getContext());
@@ -256,20 +286,18 @@ public class RobotController extends CustomRosActivity {
                                 }
                             });
                         }
-                        setPAUSE_STATE(PAUSE_WITH_STOP);
                     }
 
                 });
                 break;
             case RobotController.CONTROLLER_HORIZONTAL_STEER:
             case RobotController.CONTROLLER_HORIZONTAL_DOUBLELEVER:
-                sonarView = new SSensorView(this, sonarValues);
-                laserView = new LSensorView(this){
+                sonarView = new SonarSensorView(this, sonarValues);
+                laserView = new LaserSensorView(this){
                     @Override
                     public void onMaxValChanged(float val) {}
                 };
                 cameraView = new CameraView(this);
-                setPAUSE_STATE(PAUSE_WITHOUT_STOP);
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                 setContentView(R.layout.robotcontroller_horizontal);
                 robotNameTxt = (TextView) findViewById(R.id.controllerRobotName);
@@ -279,6 +307,7 @@ public class RobotController extends CustomRosActivity {
                 robotNameTxt.setText(robotNameStr);
                 userOption = (ImageView)findViewById(R.id.controllerUserOption);
                 userOption.setOnClickListener(optionClickListener);
+                connectionState = (ImageView) findViewById(R.id.connection_state);
                 velocityDisplayer = new VelocityDisplay(RobotController.this);
                 verticalScroll = (ScrollView)findViewById(R.id.verticalScroll);
                 verticalScroll.post(new Runnable(){
@@ -328,7 +357,6 @@ public class RobotController extends CustomRosActivity {
                                 }
                             });
                         }
-                        setPAUSE_STATE(PAUSE_WITH_STOP);
                     }
                 });
                 break;
@@ -365,14 +393,58 @@ public class RobotController extends CustomRosActivity {
         mDbOpenHelper = null;
 
     }
+
+    @Override
+    protected void onStateChangeListener(int state) {
+        switch (state) {
+            case STATE_CONNECTED:
+                connectionState.setImageResource(R.drawable.connected);
+                break;
+            case STATE_CONNECTING:
+                connectionState.setImageResource(R.drawable.connecting);
+                break;
+            case STATE_DISCONNECTED:
+                connectionState.setImageResource(R.drawable.disconnected);
+                break;
+            case STATE_UNREGISTERING:
+                connectionState.setImageResource(R.drawable.disconnecting);
+                break;
+        }
+    }
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
-
+        setPAUSE_STATE(PAUSE_WITHOUT_STOP);
         NodeConfiguration nodeConfiguration =
                 NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
         nodeConfiguration.setMasterUri(getMasterUri());
 
-        AndroidNode androidNode = new AndroidNode();
+        AndroidNode androidNode = new AndroidNode() {
+            @Override
+            public void onError(Node node, Throwable throwable) {
+                super.onError(node, throwable);
+                Log.d("NodeExcutor", "onerror");
+                android.os.Message msg = new android.os.Message();
+                msg.what = -1;
+                msg.arg1 = 1;
+                msg.obj = "Error Occured";
+                handler.sendMessage(msg);
+                try {
+                    node.shutdown();
+                } catch (org.ros.internal.node.xmlrpc.XmlRpcTimeoutException e) {
+                    Log.e("exception", "catch");
+                }
+            }
+
+            @Override
+            public void onStart(ConnectedNode connectedNode) {
+                android.os.Message msg = new android.os.Message();
+                msg.what = -1;
+                msg.arg1 = 0;
+                handler.sendMessage(msg);
+                super.onStart(connectedNode);
+            }
+        };
+
 
         CustomPublisher velocityPublisher = new CustomPublisher("mobile_base/commands/velocity",
                 geometry_msgs.Twist._TYPE, 100) {
@@ -443,10 +515,8 @@ public class RobotController extends CustomRosActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (resultCode == 0) {
+        if (resultCode == 1) {
             setPAUSE_STATE(PAUSE_WITHOUT_STOP);
-            getUserOption(idx);
-            setLayout(currentSelectedController);
         }
     }
 }

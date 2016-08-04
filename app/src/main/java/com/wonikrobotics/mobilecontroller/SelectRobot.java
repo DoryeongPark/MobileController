@@ -39,7 +39,7 @@ public class SelectRobot extends Activity {
             }
         }
     };
-    private ImageView btnOption,addRobot;
+    private ImageView addRobot;
     private View.OnClickListener clickListener = new View.OnClickListener(){
         @Override
         public void onClick(View v) {
@@ -47,10 +47,6 @@ public class SelectRobot extends Activity {
                 case R.id.select_robot_add:
                     Intent addRobotActivity = new Intent(SelectRobot.this,AddRobotDialog.class);
                     startActivityForResult(addRobotActivity,1);
-                    break;
-                case R.id.select_robot_option:
-                    Intent optionActivity = new Intent(SelectRobot.this,UserOptionDialog.class);
-                    startActivityForResult(optionActivity,0);
                     break;
                 case R.id.btnConnect:
                     if(selectedRobotPosition != -1 && robotList.get(selectedRobotPosition).getIdx() != -1) {
@@ -75,12 +71,12 @@ public class SelectRobot extends Activity {
         setContentView(R.layout.selectrobot);
         btnConnect = (TextView) findViewById(R.id.btnConnect);
         availableRobotList = (ListView) findViewById(R.id.availablerobotlist);
-        btnOption = (ImageView) findViewById(R.id.select_robot_option);
+
         addRobot = (ImageView) findViewById(R.id.select_robot_add);
         robotName = (TextView) findViewById(R.id.robot_name);
         robotURL = (TextView) findViewById(R.id.robot_url);
         robotInfo = (TextView) findViewById(R.id.robot_info);
-        btnOption.setOnClickListener(clickListener);
+
         addRobot.setOnClickListener(clickListener);
         availableRobotList.setOnItemClickListener(robotListListener);
         btnConnect.setOnClickListener(clickListener);

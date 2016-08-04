@@ -7,7 +7,6 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Shader;
-import android.util.Log;
 import android.view.View;
 
 /**
@@ -34,7 +33,6 @@ public class VelocityDisplay extends View {
             grad = new Paint();
             grad.setShader(shader);
         }
-        Log.e("onDraw",String.valueOf(canvas.getWidth())+","+String.valueOf(canvas.getHeight()));
         rf = new RectF(10,2,20,canvas.getHeight()-2);
         canvas.drawRect(rf,grad);
         rf.set(20,2,(canvas.getWidth()-20)*(this.vel/100f)+10,canvas.getHeight()-2);

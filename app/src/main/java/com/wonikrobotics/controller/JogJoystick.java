@@ -1,11 +1,8 @@
 package com.wonikrobotics.controller;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -54,13 +51,7 @@ public class JogJoystick extends ImageView{
     private float dataAngular;
     private float dataLinear;
 
-    public interface JoystickListener{
-
-        public void onMove(float dataAngular, float dataLinear);
-
-    }
-
-    public JogJoystick(Context context){
+    public JogJoystick(Context context) {
 
         super(context);
         initSettings(context);
@@ -313,11 +304,7 @@ public class JogJoystick extends ImageView{
 
         acc = (float)(distance / radius * 100);
 
-        if(distance < areaMovable.height()/2 - HEIGHT /2)
-            return true;
-
-        else
-            return false;
+        return distance < areaMovable.height() / 2 - HEIGHT / 2;
 
     }
 
@@ -341,12 +328,9 @@ public class JogJoystick extends ImageView{
     private void parseData(){
 
         float parsedDir = angleDir * accDir;
-        float parsedAWeight = (angularWeight * 0.5f) + 0.5f;
-        float parsedLWeight = (linearWeight * 0.5f) + 0.5f;
 
-        dataAngular = (angle / 90.0f) * parsedDir * parsedAWeight;
-        dataLinear = (acc / 100.0f) * accDir * parsedLWeight;
-
+        dataAngular = (angle / 90.0f) * parsedDir * angularWeight;
+        dataLinear = (acc / 100.0f) * accDir * linearWeight;
 
     }
 
@@ -391,6 +375,12 @@ public class JogJoystick extends ImageView{
                 angleDir + " " +
                 acc + " " +
                 accDir + " ";
+
+    }
+
+    public interface JoystickListener {
+
+        void onMove(float dataAngular, float dataLinear);
 
     }
 

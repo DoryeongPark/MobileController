@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.wonikrobotics.controller.ControlLever;
 import com.wonikrobotics.controller.ControlWheel;
+import com.wonikrobotics.controller.DoubleLeverCalculator;
 import com.wonikrobotics.controller.JogJoystick;
 import com.wonikrobotics.controller.SteerTypeJoystick;
 import com.wonikrobotics.mobilecontroller.database.DataBases;
@@ -333,15 +334,14 @@ public class RobotController extends CustomRosActivity {
                         verticalScroll.addView(innerScroll);
                         leftCtrLayout.removeAllViews();
                         rightCtrLayout.removeAllViews();
-                        leftCtrLayout.addView(new ControlLever(RobotController.this) {
-                            @Override
-                            public void onProgressChanged(int progress, boolean fromUser) {
-                                velocity = progress == 0 ? 0 : -1 * progress / 100f;
-                                velocityDisplayer.setVel(Math.abs(progress));
-                            }
-                        });
-
                         if(flag == RobotController.CONTROLLER_HORIZONTAL_STEER){
+                            leftCtrLayout.addView(new ControlLever(RobotController.this) {
+                                @Override
+                                public void onProgressChanged(int progress, boolean fromUser) {
+                                    velocity = progress == 0 ? 0 : -1 * progress / 100f;
+                                    velocityDisplayer.setVel(Math.abs(progress));
+                                }
+                            });
                             rightCtrLayout.addView(new ControlWheel(RobotController.this) {
                                 @Override
                                 public void onAngleChanged(int angle, boolean fromUser) {
@@ -349,11 +349,25 @@ public class RobotController extends CustomRosActivity {
                                 }
                             });
                         }else{
+                            final DoubleLeverCalculator cal = new DoubleLeverCalculator() {
+                                @Override
+                                public void valueChangeListener(float velocity, float angular) {
+                                    RobotController.this.velocity = velocity == 0 ? 0 : -1 * velocity / 100f;
+                                    RobotController.this.angular = angular == 0 ? 0 : angular / -180f;
+                                    velocityDisplayer.setVel(Math.abs(Math.round(velocity)));
+                                }
+                            };
+                            leftCtrLayout.addView(new ControlLever(RobotController.this) {
+                                @Override
+                                public void onProgressChanged(int progress, boolean fromUser) {
+                                    cal.setLeftWheelVel(progress);
 
+                                }
+                            });
                             rightCtrLayout.addView(new ControlLever(RobotController.this) {
                                 @Override
                                 public void onProgressChanged(int progress, boolean fromUser) {
-
+                                    cal.setRightWheelVel(progress);
                                 }
                             });
                         }
@@ -446,7 +460,8 @@ public class RobotController extends CustomRosActivity {
         };
 
 
-        CustomPublisher velocityPublisher = new CustomPublisher("mobile_base/commands/velocity",
+//        CustomPublisher velocityPublisher = new CustomPublisher("mobile_base/commands/velocity",
+        CustomPublisher velocityPublisher = new CustomPublisher("cmd_vel",
                 geometry_msgs.Twist._TYPE, 100) {
             @Override
             public void publishingRoutine(Publisher publisher, ConnectedNode connectedNode) {

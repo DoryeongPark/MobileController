@@ -6,18 +6,21 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.wonikrobotics.controller.ControlLever;
 import com.wonikrobotics.controller.ControlWheel;
@@ -90,6 +93,7 @@ public class RobotController extends CustomRosActivity {
     private TextView robotNameTxt;
     private ImageView userOption;
     private int idx = -1;
+    private boolean resumeDialog = false;
     private String robotNameStr;
     private View.OnClickListener optionClickListener = new View.OnClickListener() {
         @Override
@@ -152,8 +156,12 @@ public class RobotController extends CustomRosActivity {
             }
         }
     };
-
-
+    private View.OnTouchListener scrollEvent = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            return event.getPointerCount() > 1;
+        }
+    };
 
     public RobotController(){ }
 
@@ -292,10 +300,32 @@ public class RobotController extends CustomRosActivity {
                         innerScroll.addView(cameraView);
                         sonarView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(),horizontalScroll.getHeight()));
                         innerScroll.addView(sonarView);
+                        FrameLayout laserFrame = new FrameLayout(horizontalScroll.getContext());
+                        laserFrame.setLayoutParams(new FrameLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
                         laserView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(),horizontalScroll.getHeight()));
-                        innerScroll.addView(laserView);
+                        final ToggleButton resize = new ToggleButton(horizontalScroll.getContext());
+                        resize.setText("resize");
+                        resize.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                        resize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                laserView.setAutoResizing(isChecked);
+                                Log.e("toggle", Boolean.toString(isChecked));
+                            }
+                        });
+                        laserView.setOnAutoResizeChangeListener(new LaserSensorView.OnAutoResizeChangeListener() {
+                            @Override
+                            public void onChange(boolean onOff) {
+                                Log.e("onChange", Boolean.toString(onOff));
+                                resize.setChecked(onOff);
+                            }
+                        });
+                        laserFrame.addView(laserView);
+                        laserFrame.addView(resize);
+                        innerScroll.addView(laserFrame);
                         horizontalScroll.removeAllViews();
                         horizontalScroll.addView(innerScroll);
+                        horizontalScroll.setOnTouchListener(scrollEvent);
                         addEventForHorrizontalArrows();
                         Rect joystickArea = new Rect();
                         joystickLayout.getGlobalVisibleRect(joystickArea);
@@ -336,9 +366,14 @@ public class RobotController extends CustomRosActivity {
                                 }
                             });
                         }
+                        if (!resumeDialog)
+                            setPAUSE_STATE(PAUSE_WITH_STOP);
+                        else
+                            resumeDialog = false;
                     }
 
                 });
+
                 break;
             case RobotController.CONTROLLER_HORIZONTAL_STEER:
             case RobotController.CONTROLLER_HORIZONTAL_DOUBLELEVER:
@@ -362,6 +397,7 @@ public class RobotController extends CustomRosActivity {
                 verticalScroll = (ScrollView)findViewById(R.id.verticalScroll);
                 verticalLeftArrow = (ImageView)findViewById(R.id.verticalLeftArrow);
                 verticalRightArrow = (ImageView)findViewById(R.id.verticalRightArrow);
+                verticalScroll.setOnTouchListener(scrollEvent);
                 verticalScroll.post(new Runnable(){
                     @Override
                     public void run() {
@@ -376,8 +412,29 @@ public class RobotController extends CustomRosActivity {
                         innerScroll.addView(cameraView);
                         sonarView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(),verticalScroll.getHeight()));
                         innerScroll.addView(sonarView);
-                        laserView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(),verticalScroll.getHeight()));
-                        innerScroll.addView(laserView);
+                        FrameLayout laserFrame = new FrameLayout(horizontalScroll.getContext());
+                        laserFrame.setLayoutParams(new FrameLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
+                        laserView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
+                        final ToggleButton resize = new ToggleButton(horizontalScroll.getContext());
+                        resize.setText("resize");
+                        resize.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                        resize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                laserView.setAutoResizing(isChecked);
+                                Log.e("toggle", Boolean.toString(isChecked));
+                            }
+                        });
+                        laserView.setOnAutoResizeChangeListener(new LaserSensorView.OnAutoResizeChangeListener() {
+                            @Override
+                            public void onChange(boolean onOff) {
+                                Log.e("onChange", Boolean.toString(onOff));
+                                resize.setChecked(onOff);
+                            }
+                        });
+                        laserFrame.addView(laserView);
+                        laserFrame.addView(resize);
+                        innerScroll.addView(laserFrame);
                         verticalScroll.removeAllViews();
                         verticalScroll.addView(innerScroll);
                         addEventForVerticalArrows();
@@ -420,6 +477,10 @@ public class RobotController extends CustomRosActivity {
                                 }
                             });
                         }
+                        if (!resumeDialog)
+                            setPAUSE_STATE(PAUSE_WITH_STOP);
+                        else
+                            resumeDialog = false;
                     }
                 });
                 break;
@@ -474,6 +535,7 @@ public class RobotController extends CustomRosActivity {
                 break;
         }
     }
+
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
         setPAUSE_STATE(PAUSE_WITHOUT_STOP);
@@ -481,7 +543,7 @@ public class RobotController extends CustomRosActivity {
                 NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
         nodeConfiguration.setMasterUri(getMasterUri());
 
-        AndroidNode androidNode = new AndroidNode() {
+        AndroidNode androidNode = new AndroidNode("robotics") {
             @Override
             public void onError(Node node, Throwable throwable) {
                 super.onError(node, throwable);
@@ -509,8 +571,8 @@ public class RobotController extends CustomRosActivity {
         };
 
 
-//        CustomPublisher velocityPublisher = new CustomPublisher("mobile_base/commands/velocity",
-        CustomPublisher velocityPublisher = new CustomPublisher("cmd_vel",
+        CustomPublisher velocityPublisher = new CustomPublisher("mobile_base/commands/velocity",
+//        CustomPublisher velocityPublisher = new CustomPublisher("cmd_vel",
                 geometry_msgs.Twist._TYPE, 100) {
             @Override
             public void publishingRoutine(Publisher publisher, ConnectedNode connectedNode) {
@@ -581,6 +643,7 @@ public class RobotController extends CustomRosActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (resultCode == 1) {
             setPAUSE_STATE(PAUSE_WITHOUT_STOP);
+            resumeDialog = true;
         }
     }
 }

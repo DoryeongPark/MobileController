@@ -12,12 +12,14 @@ import android.view.View;
  * Created by Felix on 2016-08-03.
  */
 public class SonarSensorView extends View {
-    final int FRONT_N_BEHIND = 1;
-    float cX,cY;
-    Paint red,green;
-    float max_val = 5;
-    //    back;
-    float[] valuelist;
+    public final int FRONT_N_BEHIND = 1;
+    public final int FRONT = 2;
+    public final int BEHIND = 3;
+    private int minAngle, drawAngle;
+    private float cX, cY;
+    private Paint red, green;
+    private float max_val = 5;
+    private float[] valuelist;
 
     public SonarSensorView(Context c, float[] values) {
         super(c);
@@ -39,13 +41,10 @@ public class SonarSensorView extends View {
     private void initPaint(){
         red = new Paint();
         green = new Paint();
-//        back = new Paint();
         red.setColor(Color.RED);
         red.setAlpha(80);
         green.setColor(Color.GREEN);
         green.setAlpha(80);
-//        back.setColor(Color.WHITE);
-//        back.setAlpha(70);
     }
     public void update(float[] list){
         this.valuelist = list;

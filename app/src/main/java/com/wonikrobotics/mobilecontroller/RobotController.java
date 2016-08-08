@@ -398,7 +398,6 @@ public class RobotController extends CustomRosActivity {
                                 }
                             });
                         }else{
-
                             rightCtrLayout.addView(new ControlLever(RobotController.this) {
                                 @Override
                                 public void onProgressChanged(int progress, boolean fromUser) {

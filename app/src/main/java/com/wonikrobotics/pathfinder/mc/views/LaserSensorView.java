@@ -127,13 +127,12 @@ public abstract class LaserSensorView extends View {
                         // Only process ranges which are in the valid range.
 
                         if (scan_msg.getRangeMin() <= range && range <= scan_msg.getRangeMax()) {
-                            if (near == null) {
-                                if (currentRange == AROUND_ROBOT) {
-                                    near = new PointF(width / 2f, height / 2f);
-                                } else if (currentRange == FRONT_OF_ROBOT) {
-                                    near = new PointF(width / 2f, height);
-                                }
+                            if (currentRange == AROUND_ROBOT) {
+                                near = new PointF(width / 2f, height / 2f);
+                            } else if (currentRange == FRONT_OF_ROBOT) {
+                                near = new PointF(width / 2f, height);
                             }
+
                             far = null;
                             if (currentRange == AROUND_ROBOT) {
                                 far = new PointF((width / 2f) - (float) Math.sin(angle) * (radius) * (range / max_val),
@@ -216,13 +215,12 @@ public abstract class LaserSensorView extends View {
                         // Only process ranges which are in the valid range.
 
                         if (scan_msg.getRangeMin() <= range && range <= scan_msg.getRangeMax()) {
-                            if (near == null) {
-                                if (currentRange == AROUND_ROBOT) {
-                                    near = new PointF(width / 2f, height / 2f);
-                                } else if (currentRange == FRONT_OF_ROBOT) {
-                                    near = new PointF(width / 2f, height);
-                                }
+                            if (currentRange == AROUND_ROBOT) {
+                                near = new PointF(width / 2f, height / 2f);
+                            } else if (currentRange == FRONT_OF_ROBOT) {
+                                near = new PointF(width / 2f, height);
                             }
+
                             far = null;
                             if (currentRange == AROUND_ROBOT) {
                                 far = new PointF((width / 2f) - (float) Math.sin(angle) * (radius) * (range / max_val),

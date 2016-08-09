@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:alpha="0.6"
+    android:orientation="horizontal">
+
+    <ToggleButton
+        android:id="@+id/laser_autoresize"
+        android:layout_width="0px"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="AutoResize" />
+
+    <Spinner
+        android:id="@+id/laser_displayrange"
+        android:layout_width="0px"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:entries="@array/laserrange">
+
+    </Spinner>
+
+    <Spinner
+        android:id="@+id/laser_displaymode"
+        android:layout_width="0px"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:entries="@array/laserdisplay">
+
+    </Spinner>
+
+</LinearLayout>

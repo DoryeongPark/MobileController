@@ -13,12 +13,14 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -85,23 +87,94 @@ public class RobotController extends CustomRosActivity {
     private float[] sonarValues;
     private int[] sonarMinAngle, sonarDrawAngle;
     private SonarSensorView sonarView;
+    AdapterView.OnItemSelectedListener sonar_range_Selected = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            if (sonarView != null) {
+                switch (position) {
+                    case 0:
+                        sonarView.setScale(SonarSensorView.AROUND_ROBOT);
+                        break;
+                    case 1:
+                        sonarView.setScale(SonarSensorView.FRONT_OF_ROBOT);
+                        break;
+                    case 2:
+                        sonarView.setScale(SonarSensorView.BEHIND_OF_ROBOT);
+                        break;
+                }
+            }
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+            if (sonarView != null)
+                sonarView.setScale(SonarSensorView.AROUND_ROBOT);
+        }
+    };
     private LaserSensorView laserView;
+    AdapterView.OnItemSelectedListener laser_range_Selected = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            if (laserView != null) {
+                switch (position) {
+                    case 0:
+                        laserView.setDisplayRangeMode(LaserSensorView.AROUND_ROBOT);
+                        break;
+                    case 1:
+                        laserView.setDisplayRangeMode(LaserSensorView.FRONT_OF_ROBOT);
+                        break;
+                }
+            }
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+            if (laserView != null)
+                laserView.setDisplayRangeMode(LaserSensorView.AROUND_ROBOT);
+        }
+    };
+    AdapterView.OnItemSelectedListener laser_displayMode_Selected = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            if (laserView != null) {
+                switch (position) {
+                    case 0:
+                        laserView.setDiplayMode(LaserSensorView.FILL_INSIDE);
+                        break;
+                    case 1:
+                        laserView.setDiplayMode(LaserSensorView.FILL_OUTSIDE);
+                        break;
+                    case 2:
+                        laserView.setDiplayMode(LaserSensorView.POINT_CLOUD);
+                        break;
+                    case 3:
+                        laserView.setDiplayMode(LaserSensorView.POINT_CLOUD_FILL_INSIDE);
+                        break;
+                    case 4:
+                        laserView.setDiplayMode(LaserSensorView.POINT_CLOUD_FILL_OUTSIDE);
+                        break;
+
+                }
+            }
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
+    };
     private CameraView cameraView;
     private ImageView connectionState;
-
     private ImageView verticalLeftArrow;
     private ImageView verticalRightArrow;
     private ImageView horizontalLeftArrow;
     private ImageView horizontalRightArrow;
-
     private LinearLayout viewContents;
-
     /**
      * operated value for publish
      **/
     private float velocity;
     private float angular;
-
     /**
      * base app views
      **/
@@ -120,7 +193,6 @@ public class RobotController extends CustomRosActivity {
             startActivity(userOptionDialog);
         }
     };
-
     /**
      * handler
      **/
@@ -182,7 +254,6 @@ public class RobotController extends CustomRosActivity {
             return event.getPointerCount() > 1;
         }
     };
-
     public RobotController() {
     }
 
@@ -333,8 +404,16 @@ public class RobotController extends CustomRosActivity {
                         camera_icon.setImageResource(R.drawable.camera);
                         camera_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
                         viewContents.addView(camera_icon);
+                        FrameLayout sonarFrame = new FrameLayout(horizontalScroll.getContext());
+                        sonarFrame.setLayoutParams(new FrameLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
+                        LinearLayout sonaroption = (LinearLayout) getLayoutInflater().inflate(R.layout.sonaroption, null);
+                        sonaroption.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT));
+                        Spinner sonarOption = (Spinner) sonaroption.findViewById(R.id.sonar_rangeoption);
+                        sonarOption.setOnItemSelectedListener(sonar_range_Selected);
                         sonarView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
-                        innerScroll.addView(sonarView);
+                        sonarFrame.addView(sonarView);
+                        sonarFrame.addView(sonaroption);
+                        innerScroll.addView(sonarFrame);
                         ImageView sonar_icon = new ImageView(viewContents.getContext());
                         sonar_icon.setImageResource(R.drawable.sonar);
                         sonar_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
@@ -344,10 +423,10 @@ public class RobotController extends CustomRosActivity {
                         laserView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
                         laserView.setDisplayRangeMode(LaserSensorView.AROUND_ROBOT);
                         laserView.setDiplayMode(LaserSensorView.POINT_CLOUD);
-                        final ToggleButton resize = new ToggleButton(horizontalScroll.getContext());
+                        LinearLayout laseroption = (LinearLayout) getLayoutInflater().inflate(R.layout.laseroption, null);
+                        laseroption.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT));
+                        final ToggleButton resize = (ToggleButton) laseroption.findViewById(R.id.laser_autoresize);
                         resize.setChecked(true);
-                        resize.setText("resize");
-                        resize.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                         resize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                             @Override
                             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -360,8 +439,12 @@ public class RobotController extends CustomRosActivity {
                                 resize.setChecked(onOff);
                             }
                         });
+                        Spinner visibleRangeOption = (Spinner) laseroption.findViewById(R.id.laser_displayrange);
+                        visibleRangeOption.setOnItemSelectedListener(laser_range_Selected);
+                        Spinner laserDisplayOption = (Spinner) laseroption.findViewById(R.id.laser_displaymode);
+                        laserDisplayOption.setOnItemSelectedListener(laser_displayMode_Selected);
                         laserFrame.addView(laserView);
-                        laserFrame.addView(resize);
+                        laserFrame.addView(laseroption);
                         innerScroll.addView(laserFrame);
                         ImageView laser_icon = new ImageView(viewContents.getContext());
                         laser_icon.setImageResource(R.drawable.laser);

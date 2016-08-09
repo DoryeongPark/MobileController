@@ -82,6 +82,7 @@
             android:gravity="center"
             android:orientation="vertical"
             android:weightSum="1">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0px"
@@ -97,6 +98,16 @@
                     android:gravity="center"
                     android:orientation="vertical"
                     android:weightSum="1">
+
+                    <LinearLayout
+                        android:id="@+id/view_contents"
+                        android:layout_width="match_parent"
+                        android:layout_height="0px"
+                        android:layout_weight="0.1"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                    </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0px"

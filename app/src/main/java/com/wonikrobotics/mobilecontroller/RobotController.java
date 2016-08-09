@@ -412,10 +412,10 @@ public class RobotController extends CustomRosActivity {
                         innerScroll.addView(cameraView);
                         sonarView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(),verticalScroll.getHeight()));
                         innerScroll.addView(sonarView);
-                        FrameLayout laserFrame = new FrameLayout(horizontalScroll.getContext());
-                        laserFrame.setLayoutParams(new FrameLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
-                        laserView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
-                        final ToggleButton resize = new ToggleButton(horizontalScroll.getContext());
+                        FrameLayout laserFrame = new FrameLayout(verticalScroll.getContext());
+                        laserFrame.setLayoutParams(new FrameLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
+                        laserView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
+                        final ToggleButton resize = new ToggleButton(verticalScroll.getContext());
                         resize.setText("resize");
                         resize.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                         resize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -459,9 +459,9 @@ public class RobotController extends CustomRosActivity {
                             final DoubleLeverCalculator cal = new DoubleLeverCalculator() {
                                 @Override
                                 public void valueChangeListener(float velocity, float angular) {
-                                    RobotController.this.velocity = velocity == 0 ? 0 : -1 * velocity / 100f;
-                                    RobotController.this.angular = angular == 0 ? 0 : angular / -180f;
-                                    velocityDisplayer.setVel(Math.abs(Math.round(velocity)));
+                                    RobotController.this.velocity = -1 * velocity;
+                                    RobotController.this.angular = angular;
+                                    velocityDisplayer.setVel(Math.abs(Math.round(velocity * 100)));
                                 }
                             };
                             leftCtrLayout.addView(new ControlLever(RobotController.this) {

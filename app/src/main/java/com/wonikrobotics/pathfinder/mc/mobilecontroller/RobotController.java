@@ -204,8 +204,10 @@ public class RobotController extends CustomRosActivity {
             idx = instance.getIntExtra("IDX", -1);
         getUserOption(getIntent().getIntExtra("IDX", -1));
         setLayout(currentSelectedController);
-        if (instance.hasExtra("URL") && instance.hasExtra("MASTER"))
-            setURI(getIntent().getStringExtra("URL"), getIntent().getBooleanExtra("MASTER", false));
+        if (!resumeDialog) {
+            if (instance.hasExtra("URL") && instance.hasExtra("MASTER"))
+                setURI(getIntent().getStringExtra("URL"), getIntent().getBooleanExtra("MASTER", false));
+        }
     }
 
     private void initData() {
@@ -341,7 +343,7 @@ public class RobotController extends CustomRosActivity {
                         laserFrame.setLayoutParams(new FrameLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
                         laserView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
                         laserView.setDisplayRangeMode(LaserSensorView.AROUND_ROBOT);
-                        laserView.setDiplayMode(LaserSensorView.POINT_CLOUD_FILL_OUTSIDE);
+                        laserView.setDiplayMode(LaserSensorView.POINT_CLOUD);
                         final ToggleButton resize = new ToggleButton(horizontalScroll.getContext());
                         resize.setChecked(true);
                         resize.setText("resize");
@@ -468,6 +470,8 @@ public class RobotController extends CustomRosActivity {
                         FrameLayout laserFrame = new FrameLayout(verticalScroll.getContext());
                         laserFrame.setLayoutParams(new FrameLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
                         laserView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
+                        laserView.setDisplayRangeMode(LaserSensorView.FRONT_OF_ROBOT);
+                        laserView.setDiplayMode(LaserSensorView.POINT_CLOUD);
                         final ToggleButton resize = new ToggleButton(verticalScroll.getContext());
                         resize.setChecked(true);
                         resize.setText("resize");

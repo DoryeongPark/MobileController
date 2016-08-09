@@ -58,7 +58,7 @@ public class DbOpenHelper {
 
     }
 
-    public boolean updateCulumn(String idx, String name, String uri, String master) {
+    public boolean updateColumn(String idx, String name, String uri, String master) {
 //        mDB.rawQuery("UPDATE "+DataBases.CreateDB._TABLENAME+" SET "+DataBases.CreateDB.NAME+"="+name+", "+DataBases.CreateDB.URI+"="+uri+" WHERE "+DataBases.CreateDB.IDX+"="+idx+";",null);
         Log.d("DataBase", "update the value" + name + "," + uri);
         ContentValues values = new ContentValues();

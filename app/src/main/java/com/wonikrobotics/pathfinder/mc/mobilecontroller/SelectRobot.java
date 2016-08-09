@@ -188,7 +188,7 @@ public class SelectRobot extends Activity {
                 mDbOpenHelper = new DbOpenHelper(SelectRobot.this);
             }
             mDbOpenHelper.open();
-            mDbOpenHelper.updateCulumn(Integer.toString(intent.getIntExtra("idx", -1)), intent.getStringExtra("name"), intent.getStringExtra("uri"), intent.getStringExtra("master"));
+            mDbOpenHelper.updateColumn(Integer.toString(intent.getIntExtra("idx", -1)), intent.getStringExtra("name"), intent.getStringExtra("uri"), intent.getStringExtra("master"));
             Toast.makeText(SelectRobot.this, "Update robot information is success", Toast.LENGTH_SHORT).show();
             robotListDataLoad();
         }

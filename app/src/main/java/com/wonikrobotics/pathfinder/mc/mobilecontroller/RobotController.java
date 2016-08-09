@@ -176,6 +176,14 @@ public class RobotController extends CustomRosActivity {
             }
         }
     };
+
+    private ConnectionTimer cTimer = new ConnectionTimer(10){
+        @Override
+        public void onTimerFinished() {
+            RobotController.this.onTimerFinished();
+        }
+    };
+
     private View.OnTouchListener scrollEvent = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
@@ -184,12 +192,13 @@ public class RobotController extends CustomRosActivity {
     };
 
     public RobotController() {
+
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        cTimer.start();
     }
 
     @Override
@@ -207,7 +216,32 @@ public class RobotController extends CustomRosActivity {
         if (!resumeDialog) {
             if (instance.hasExtra("URL") && instance.hasExtra("MASTER"))
                 setURI(getIntent().getStringExtra("URL"), getIntent().getBooleanExtra("MASTER", false));
+            if(cTimer == null){
+                cTimer = new ConnectionTimer(10){
+                    @Override
+                    public void onTimerFinished() {
+                        RobotController.this.onTimerFinished();
+                    }
+                };
+                cTimer.start();
+            }
         }
+
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        if(cTimer != null) {
+            cTimer.shutDown();
+            cTimer = null;
+        }
+    }
+
+    private void onTimerFinished(){
+
+        //Define codes if Timer's finished...
+
     }
 
     private void initData() {
@@ -700,6 +734,17 @@ public class RobotController extends CustomRosActivity {
             }
         };
         androidNode.addSubscriber(cameraSubscriber);
+
+        CustomSubscriber timerSubscriber = new CustomSubscriber("clock", rosgraph_msgs.Clock._TYPE){
+            @Override
+            public void subscribingRoutine(Message message) {
+
+                if(cTimer != null)
+                    cTimer.getHeartBeat();
+            }
+        };
+
+        androidNode.addSubscriber(timerSubscriber);
 
         nodeMainExecutor.execute(androidNode, nodeConfiguration);
 

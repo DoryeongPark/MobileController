@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="laserrange">
+        <item name="around">Around</item>
+        <item name="front">Front</item>
+    </string-array>
+    <string-array name="laserdisplay">
+        <item name="inside">Fill Inside</item>
+        <item name="outside">Fill Outside</item>
+        <item name="pointclude">Point Cloud</item>
+        <item name="pointin">Fill Inside n Point</item>
+        <item name="pointout">Fill Outside n Point</item>
+    </string-array>
+    <string-array name="sonardisplay">
+        <item name="around">Around</item>
+        <item name="front">Front</item>
+        <item name="Behind">Behind</item>
+    </string-array>
+</resources>

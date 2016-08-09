@@ -11,15 +11,19 @@
         android:id="@+id/woniklogo"
         android:layout_width="wrap_content"
         android:layout_height="0px"
-        android:layout_weight="2"
+        android:layout_weight="1.5"
         android:scaleType="centerInside"
         android:src="@drawable/logo" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="0.2" />
     <ImageView
         android:id="@+id/robotics"
         android:layout_width="wrap_content"
         android:layout_height="0px"
-        android:layout_weight="0.5"
+        android:layout_weight="0.7"
         android:scaleType="centerInside"
         android:src="@drawable/robotics" />
 

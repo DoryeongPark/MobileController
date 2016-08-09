@@ -42,6 +42,11 @@
             android:theme="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
 
         </activity>
+        <activity
+            android:name=".RobotModifyDialog"
+            android:theme="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
+
+        </activity>
         <service android:name="com.wonikrobotics.ros.CustomNodeMainExecutorService" android:exported="false">
             <intent-filter>
                 <action android:name="com.wonikrobotics.ros.CustomNodeMainExecutorService"/>

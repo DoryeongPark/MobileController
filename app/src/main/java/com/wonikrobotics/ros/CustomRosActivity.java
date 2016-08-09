@@ -66,8 +66,6 @@ public abstract class CustomRosActivity  extends Activity {
     }
 
     private void startNodeMainExecutorService() {
-        this.STATE = STATE_CONNECTING;
-        onStateChangeListener(STATE);
         Intent intent = new Intent(this, CustomNodeMainExecutorService.class);
         intent.setAction(CustomNodeMainExecutorService.ACTION_START);
         startService(intent);
@@ -204,7 +202,7 @@ public abstract class CustomRosActivity  extends Activity {
                     return null;
                 }
             }.execute();
-            STATE = STATE_CONNECTED;
+            STATE = STATE_CONNECTING;
             onStateChangeListener(STATE);
         }
 
@@ -212,8 +210,6 @@ public abstract class CustomRosActivity  extends Activity {
         public void onServiceDisconnected(ComponentName name) {
             Log.e("service disconnected", name.toString());
             serviceConnection = false;
-            STATE = STATE_DISCONNECTED;
-            onStateChangeListener(STATE);
         }
     }
 

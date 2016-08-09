@@ -1,8 +1,6 @@
 package com.wonikrobotics.controller;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -53,13 +51,7 @@ public class SteerTypeJoystick extends ImageView {
     private float dataAngular;
     private float dataLinear;
 
-    public interface JoystickListener{
-
-        public void onMove(float dataAngular, float dataLinear);
-
-    }
-
-    public SteerTypeJoystick(Context context){
+    public SteerTypeJoystick(Context context) {
 
         super(context);
         initSettings(context);
@@ -348,11 +340,9 @@ public class SteerTypeJoystick extends ImageView {
     private void parseData(){
 
         float parsedDir = angleDir * accDir;
-        float parsedAWeight = (angularWeight * 0.5f) + 0.5f;
-        float parsedLWeight = (linearWeight * 0.5f) + 0.5f;
 
-        dataAngular = (angle / 90.0f) * parsedDir * parsedAWeight;
-        dataLinear = (acc / 100.0f) * accDir * parsedLWeight;
+        dataAngular = (angle / 90.0f) * parsedDir * angularWeight;
+        dataLinear = (acc / 100.0f) * accDir * linearWeight;
 
     }
 
@@ -387,6 +377,12 @@ public class SteerTypeJoystick extends ImageView {
                 angleDir + " " +
                 acc + " " +
                 accDir + " ";
+
+    }
+
+    public interface JoystickListener {
+
+        void onMove(float dataAngular, float dataLinear);
 
     }
 

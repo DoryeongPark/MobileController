@@ -22,7 +22,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="0px"
-        android:layout_weight="0.4"
+        android:layout_weight="0.3"
         android:background="#bdbdbe"/>
     <LinearLayout
         android:layout_width="match_parent"
@@ -120,7 +120,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0px"
-        android:layout_weight="4"
+        android:layout_weight="4.1"
         android:background="#e6e6e6"
         android:gravity="center"
         android:orientation="horizontal"
@@ -154,7 +154,7 @@
                         android:gravity="center_vertical|left"
                         android:text="Angular"
                         android:textColor="#000000"
-                        android:textSize="7pt" />
+                        android:textSize="6pt" />
                     <TextView
                         android:id="@+id/useropt_sst_angulartxt"
                         android:layout_width="0px"
@@ -163,7 +163,7 @@
                         android:gravity="center_vertical|right"
                         android:text="0.8"
                         android:textColor="#000000"
-                        android:textSize="7pt" />
+                        android:textSize="6pt" />
                 </LinearLayout>
                 <SeekBar
                     android:id="@+id/useropt_sst_angularbar"
@@ -190,7 +190,7 @@
                         android:gravity="center_vertical|left"
                         android:text="Velocity"
                         android:textColor="#000000"
-                        android:textSize="7pt" />
+                        android:textSize="6pt" />
                     <TextView
                         android:id="@+id/useropt_sst_veltxt"
                         android:layout_width="0px"
@@ -199,7 +199,7 @@
                         android:gravity="center_vertical|right"
                         android:text="0.8"
                         android:textColor="#000000"
-                        android:textSize="7pt" />
+                        android:textSize="6pt" />
                 </LinearLayout>
                 <SeekBar
                     android:id="@+id/useropt_sst_velbar"

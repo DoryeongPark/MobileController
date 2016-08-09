@@ -15,18 +15,17 @@ public class AndroidNode extends AbstractNodeMain implements NodeMain{
 
     private Vector<CustomPublisher> publishers;
     private Vector<CustomSubscriber> subscribers;
+    private GraphName nodeName;
 
-    public AndroidNode() {
+    public AndroidNode(String nodename) {
 
         publishers = new Vector<CustomPublisher>();
         subscribers = new Vector<CustomSubscriber>();
-
+        nodeName = GraphName.of(nodename);
     }
     @Override
     public GraphName getDefaultNodeName(){
-
-        return GraphName.of("AndroidNode");
-
+        return nodeName;
     }
     @Override
     public void onStart(final ConnectedNode connectedNode){

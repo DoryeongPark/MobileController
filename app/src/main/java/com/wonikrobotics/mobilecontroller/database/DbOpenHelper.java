@@ -58,16 +58,13 @@ public class DbOpenHelper {
 
     }
 
-    public boolean updateColumn(String idx, String name, String uri, String master, String controller, String velocity, String angular) {
+    public boolean updateColumn(String idx, String name, String uri, String master) {
 //        mDB.rawQuery("UPDATE "+DataBases.CreateDB._TABLENAME+" SET "+DataBases.CreateDB.NAME+"="+name+", "+DataBases.CreateDB.URI+"="+uri+" WHERE "+DataBases.CreateDB.IDX+"="+idx+";",null);
         Log.d("DataBase","update the value"+name+","+uri);
         ContentValues values = new ContentValues();
         values.put(DataBases.CreateDB.NAME, name);
         values.put(DataBases.CreateDB.URI, uri);
         values.put(DataBases.CreateDB.MASTER, master);
-        values.put(DataBases.CreateDB.CONTROLLER, controller);
-        values.put(DataBases.CreateDB.VELOCITY, velocity);
-        values.put(DataBases.CreateDB.ANGULAR, angular);
         return mDB.update(DataBases.CreateDB._TABLENAME, values, "idx="+idx, null) > 0;
 
     }

@@ -122,9 +122,21 @@ public abstract class CustomRosActivity extends Activity {
         }
     }
 
+    public int getPAUSE_STATE() {
+        return this.PAUSE_STATE;
+    }
+
     public void setPAUSE_STATE(int state) {
         PAUSE_STATE = state;
         Log.e("set pause state", String.valueOf(PAUSE_STATE));
+    }
+
+    public int getStateConnect() {
+        return this.STATE;
+    }
+
+    public void setStateConnect(int state) {
+        this.STATE = state;
     }
 
     public void disConnect() {

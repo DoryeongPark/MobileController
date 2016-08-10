@@ -62,13 +62,13 @@ public class RobotController extends CustomRosActivity {
     static final int CONTROLLER_VERTICAL_YTHETA = 2;
     static final int CONTROLLER_HORIZONTAL_STEER = 3;
     static final int CONTROLLER_HORIZONTAL_DOUBLELEVER = 4;
+    private static ConnectionTimer cTimer = null;
     /**
      * define layout and views for scroll the sensor views
      **/
     private ScrollView verticalScroll;
     private HorizontalScrollView horizontalScroll;
     private LinearLayout innerScroll;
-
     /**
      * define controller views
      **/
@@ -80,14 +80,46 @@ public class RobotController extends CustomRosActivity {
     private SteerTypeJoystick steerTypeJoystick;
     private int currentSelectedController;
     private float velSensitive, angSensitive;
-
     /**
      * define views for display sensor data
      **/
     private float[] sonarValues;
     private int[] sonarMinAngle, sonarDrawAngle;
     private SonarSensorView sonarView;
-    AdapterView.OnItemSelectedListener sonar_range_Selected = new AdapterView.OnItemSelectedListener() {
+    private CameraView cameraView;
+    private ImageView connectionState;
+    private ImageView verticalLeftArrow;
+    private ImageView verticalRightArrow;
+    private ImageView horizontalLeftArrow;
+    private ImageView horizontalRightArrow;
+    private LinearLayout viewContents;
+    /**
+     * operated value for publish
+     **/
+    private float velocity;
+    private float angular;
+    /**
+     * base app views
+     **/
+    private TextView robotNameTxt;
+    private ImageView userOption;
+    private int idx = -1;
+    private boolean resumeDialog = false;
+    private String robotNameStr;
+    /**
+     *   listeners
+     **/
+    private View.OnClickListener optionClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            setPAUSE_STATE(PAUSE_WITHOUT_STOP);
+            Intent userOptionDialog = new Intent(RobotController.this, UserOptionDialog.class);
+            userOptionDialog.putExtra("IDX", idx);
+            resumeDialog = true;
+            startActivity(userOptionDialog);
+        }
+    };
+    private AdapterView.OnItemSelectedListener sonar_range_Selected = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             if (sonarView != null) {
@@ -112,7 +144,7 @@ public class RobotController extends CustomRosActivity {
         }
     };
     private LaserSensorView laserView;
-    AdapterView.OnItemSelectedListener laser_range_Selected = new AdapterView.OnItemSelectedListener() {
+    private AdapterView.OnItemSelectedListener laser_range_Selected = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             if (laserView != null) {
@@ -133,7 +165,7 @@ public class RobotController extends CustomRosActivity {
                 laserView.setDisplayRangeMode(LaserSensorView.AROUND_ROBOT);
         }
     };
-    AdapterView.OnItemSelectedListener laser_displayMode_Selected = new AdapterView.OnItemSelectedListener() {
+    private AdapterView.OnItemSelectedListener laser_displayMode_Selected = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             if (laserView != null) {
@@ -163,36 +195,6 @@ public class RobotController extends CustomRosActivity {
 
         }
     };
-    private CameraView cameraView;
-    private ImageView connectionState;
-    private ImageView verticalLeftArrow;
-    private ImageView verticalRightArrow;
-    private ImageView horizontalLeftArrow;
-    private ImageView horizontalRightArrow;
-    private LinearLayout viewContents;
-    /**
-     * operated value for publish
-     **/
-    private float velocity;
-    private float angular;
-    /**
-     * base app views
-     **/
-    private TextView robotNameTxt;
-    private ImageView userOption;
-    private int idx = -1;
-    private boolean resumeDialog = false;
-    private String robotNameStr;
-    private View.OnClickListener optionClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            setPAUSE_STATE(PAUSE_WITHOUT_STOP);
-            Intent userOptionDialog = new Intent(RobotController.this, UserOptionDialog.class);
-            userOptionDialog.putExtra("IDX", idx);
-            resumeDialog = true;
-            startActivity(userOptionDialog);
-        }
-    };
     /**
      * handler
      **/
@@ -205,14 +207,18 @@ public class RobotController extends CustomRosActivity {
                     switch (msg.arg1) {
                         case 0:             //on connected node start
                             connectionState.setImageResource(R.drawable.connected);
+                            setStateConnect(STATE_CONNECTED);
                             break;
                         case 1:             //on error occured
                             connectionState.setImageResource(R.drawable.disconnecting);
+                            setStateConnect(STATE_UNREGISTERING);
                             this.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
                                     try {
+                                        Log.e("disconnted", "on error");
                                         connectionState.setImageResource(R.drawable.disconnected);
+                                        setStateConnect(STATE_DISCONNECTED);
                                         AlertDialog.Builder builder = new AlertDialog.Builder(RobotController.this);
                                         builder.setTitle("Connection Failed").setOnDismissListener(new DialogInterface.OnDismissListener() {
                                             @Override
@@ -248,28 +254,16 @@ public class RobotController extends CustomRosActivity {
             }
         }
     };
-
-    private ConnectionTimer cTimer = new ConnectionTimer(10){
-        @Override
-        public void onTimerFinished() {
-            RobotController.this.onTimerFinished();
-        }
-    };
-
     private View.OnTouchListener scrollEvent = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             return event.getPointerCount() > 1;
         }
     };
-    public RobotController() {
-
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        cTimer.start();
     }
 
     @Override
@@ -284,18 +278,10 @@ public class RobotController extends CustomRosActivity {
             idx = instance.getIntExtra("IDX", -1);
         getUserOption(getIntent().getIntExtra("IDX", -1));
         setLayout(currentSelectedController);
+        Log.e("onresume", Boolean.toString(resumeDialog));
         if (!resumeDialog) {
             if (instance.hasExtra("URL") && instance.hasExtra("MASTER"))
                 setURI(getIntent().getStringExtra("URL"), getIntent().getBooleanExtra("MASTER", false));
-            if(cTimer == null){
-                cTimer = new ConnectionTimer(10){
-                    @Override
-                    public void onTimerFinished() {
-                        RobotController.this.onTimerFinished();
-                    }
-                };
-                cTimer.start();
-            }
         }
 
     }
@@ -303,30 +289,37 @@ public class RobotController extends CustomRosActivity {
     @Override
     public void onPause(){
         super.onPause();
-        if(cTimer != null) {
-            cTimer.shutDown();
-            cTimer = null;
+        if (getPAUSE_STATE() == PAUSE_WITH_STOP) {
+            if (cTimer != null) {
+                cTimer.shutDown();
+                cTimer = null;
+            }
         }
     }
 
     private void onTimerFinished(){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    connectionState.setImageResource(R.drawable.disconnected);
+                    setStateConnect(STATE_DISCONNECTED);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(RobotController.this);
+                    builder.setTitle("Connection Failed").setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            finish();
+                        }
+                    });
+                    builder.setMessage("Check the network state");
 
-        try {
-            connectionState.setImageResource(R.drawable.disconnected);
-            AlertDialog.Builder builder = new AlertDialog.Builder(RobotController.this);
-            builder.setTitle("Connection Failed").setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    finish();
+                    builder.create();
+                    builder.show();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
-            builder.setMessage("Check the network state");
-
-            builder.create();
-            builder.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            }
+        });
 
     }
 
@@ -440,6 +433,20 @@ public class RobotController extends CustomRosActivity {
                 horizontalScroll.post(new Runnable() {
                     @Override
                     public void run() {
+                        switch (getStateConnect()) {
+                            case STATE_CONNECTED:
+                                connectionState.setImageResource(R.drawable.connected);
+                                break;
+                            case STATE_CONNECTING:
+                                connectionState.setImageResource(R.drawable.connecting);
+                                break;
+                            case STATE_DISCONNECTED:
+                                connectionState.setImageResource(R.drawable.disconnected);
+                                break;
+                            case STATE_UNREGISTERING:
+                                connectionState.setImageResource(R.drawable.disconnecting);
+                                break;
+                        }
                         velocityDisplayLayout.removeAllViews();
                         velocityDisplayLayout.addView(velocityDisplayer);
                         innerScroll = new LinearLayout(horizontalScroll.getContext());
@@ -580,6 +587,20 @@ public class RobotController extends CustomRosActivity {
                 verticalScroll.post(new Runnable() {
                     @Override
                     public void run() {
+                        switch (getStateConnect()) {
+                            case STATE_CONNECTED:
+                                connectionState.setImageResource(R.drawable.connected);
+                                break;
+                            case STATE_CONNECTING:
+                                connectionState.setImageResource(R.drawable.connecting);
+                                break;
+                            case STATE_DISCONNECTED:
+                                connectionState.setImageResource(R.drawable.disconnected);
+                                break;
+                            case STATE_UNREGISTERING:
+                                connectionState.setImageResource(R.drawable.disconnecting);
+                                break;
+                        }
                         velocityDisplayLayout.removeAllViews();
                         velocityDisplayLayout.addView(velocityDisplayer);
                         innerScroll = new LinearLayout(verticalScroll.getContext());
@@ -730,6 +751,7 @@ public class RobotController extends CustomRosActivity {
                 connectionState.setImageResource(R.drawable.connecting);
                 break;
             case STATE_DISCONNECTED:
+                Log.e("disconnected", "on listener");
                 connectionState.setImageResource(R.drawable.disconnected);
                 break;
             case STATE_UNREGISTERING:
@@ -855,7 +877,15 @@ public class RobotController extends CustomRosActivity {
         androidNode.addSubscriber(timerSubscriber);
 
         nodeMainExecutor.execute(androidNode, nodeConfiguration);
-
+        if (cTimer == null) {
+            cTimer = new ConnectionTimer(5) {
+                @Override
+                public void onTimerFinished() {
+                    RobotController.this.onTimerFinished();
+                }
+            };
+            cTimer.start();
+        }
     }
 
 }

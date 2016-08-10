@@ -829,7 +829,7 @@ public class RobotController extends CustomRosActivity {
         };
         androidNode.addSubscriber(laserSubscriber);
 
-        CustomSubscriber cameraSubscriber = new CustomSubscriber("camera/rgb/image_raw/compressed", sensor_msgs.CompressedImage._TYPE) {
+        CustomSubscriber cameraSubscriber = new CustomSubscriber("image/compressed", sensor_msgs.CompressedImage._TYPE) {
             @Override
             public void subscribingRoutine(Message message) {
                 BitmapFromCompressedImage bfci = new BitmapFromCompressedImage();

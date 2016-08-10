@@ -311,7 +311,22 @@ public class RobotController extends CustomRosActivity {
 
     private void onTimerFinished(){
 
-        //Define codes if Timer's finished...
+        try {
+            connectionState.setImageResource(R.drawable.disconnected);
+            AlertDialog.Builder builder = new AlertDialog.Builder(RobotController.this);
+            builder.setTitle("Connection Failed").setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    finish();
+                }
+            });
+            builder.setMessage("Check the network state");
+
+            builder.create();
+            builder.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 

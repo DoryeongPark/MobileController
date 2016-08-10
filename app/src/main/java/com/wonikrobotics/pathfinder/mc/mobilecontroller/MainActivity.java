@@ -4,10 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 public class MainActivity extends Activity {
+    ImageView logo, robotics;
+    LinearLayout loading;
     Handler handler;
     Runnable goOver = new Runnable() {
         @Override
@@ -24,10 +28,13 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ImageView logo = (ImageView) findViewById(R.id.woniklogo);
-        ImageView robotics = (ImageView) findViewById(R.id.robotics);
-        logo.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+        loading = (LinearLayout) findViewById(R.id.loading_layout);
+        logo = (ImageView) findViewById(R.id.woniklogo);
+        robotics = (ImageView) findViewById(R.id.robotics);
+        robotics.setVisibility(View.VISIBLE);
         robotics.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+        logo.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+
         handler = new Handler();
         handler.postDelayed(goOver, 3000);
     }

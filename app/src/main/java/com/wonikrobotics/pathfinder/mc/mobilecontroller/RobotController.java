@@ -544,6 +544,12 @@ public class RobotController extends CustomRosActivity {
                         camera_icon.setImageResource(R.drawable.camera);
                         camera_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
                         viewContents.addView(camera_icon);
+                        FrameLayout sonarFrame = new FrameLayout(verticalScroll.getContext());
+                        sonarFrame.setLayoutParams(new FrameLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
+                        LinearLayout sonaroption = (LinearLayout) getLayoutInflater().inflate(R.layout.sonaroption, null);
+                        sonaroption.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT));
+                        Spinner sonarOption = (Spinner) sonaroption.findViewById(R.id.sonar_rangeoption);
+                        sonarOption.setOnItemSelectedListener(sonar_range_Selected);
                         sonarView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
                         innerScroll.addView(sonarView);
                         ImageView sonar_icon = new ImageView(viewContents.getContext());
@@ -555,10 +561,10 @@ public class RobotController extends CustomRosActivity {
                         laserView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
                         laserView.setDisplayRangeMode(LaserSensorView.FRONT_OF_ROBOT);
                         laserView.setDiplayMode(LaserSensorView.POINT_CLOUD);
-                        final ToggleButton resize = new ToggleButton(verticalScroll.getContext());
+                        LinearLayout laseroption = (LinearLayout) getLayoutInflater().inflate(R.layout.laseroption, null);
+                        laseroption.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT));
+                        final ToggleButton resize = (ToggleButton) laseroption.findViewById(R.id.laser_autoresize);
                         resize.setChecked(true);
-                        resize.setText("resize");
-                        resize.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                         resize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                             @Override
                             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -571,8 +577,12 @@ public class RobotController extends CustomRosActivity {
                                 resize.setChecked(onOff);
                             }
                         });
+                        Spinner visibleRangeOption = (Spinner) laseroption.findViewById(R.id.laser_displayrange);
+                        visibleRangeOption.setOnItemSelectedListener(laser_range_Selected);
+                        Spinner laserDisplayOption = (Spinner) laseroption.findViewById(R.id.laser_displaymode);
+                        laserDisplayOption.setOnItemSelectedListener(laser_displayMode_Selected);
                         laserFrame.addView(laserView);
-                        laserFrame.addView(resize);
+                        laserFrame.addView(laseroption);
                         innerScroll.addView(laserFrame);
                         ImageView laser_icon = new ImageView(viewContents.getContext());
                         laser_icon.setImageResource(R.drawable.laser);

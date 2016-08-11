@@ -52,7 +52,7 @@
             android:name="com.wonikrobotics.pathfinder.mc.ros.CustomNodeMainExecutorService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.wonikrobotics.mc.ros.CustomNodeMainExecutorService" />
+                <action android:name="com.wonikrobotics.pathfinder.mc.ros.CustomNodeMainExecutorService" />
             </intent-filter>
         </service>
     </application>

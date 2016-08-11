@@ -27,8 +27,8 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class CustomNodeMainExecutorService extends Service implements NodeMainExecutor {
 
-    static final String ACTION_START = "com.wonikrobotics.ros.ACTION_START_NODE_RUNNER_SERVICE";
-    static final String ACTION_SHUTDOWN = "com.wonikrobotics.ros.ACTION_SHUTDOWN_NODE_RUNNER_SERVICE";
+    static final String ACTION_START = "com.wonikrobotics.pathfinder.mc.ros.ACTION_START_NODE_RUNNER_SERVICE";
+    static final String ACTION_SHUTDOWN = "com.wonikrobotics.pathfinder.mc.ros.ACTION_SHUTDOWN_NODE_RUNNER_SERVICE";
     private static final String TAG = "NodeMainExecutorService";
     private final NodeMainExecutor nodeMainExecutor;
     private final IBinder binder;
@@ -36,7 +36,7 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
 
     private PowerManager.WakeLock wakeLock;
     private WifiManager.WifiLock wifiLock;
-    private RosCore rosCore;
+    private RosCore rosCore = null;
     private URI masterUri;
 
     public CustomNodeMainExecutorService() {
@@ -98,8 +98,11 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
             Log.e("error", "on shutdown");
             e.printStackTrace();
         }
+        if (masterUri != null)
+            masterUri = null;
         if (rosCore != null) {
             rosCore.shutdown();
+            rosCore = null;
         }
         if (wakeLock.isHeld()) {
             wakeLock.release();
@@ -132,6 +135,23 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
     }
 
     @Override
+    public boolean onUnbind(Intent intent) {
+        return super.onUnbind(intent);
+    }
+
+    public boolean hasMaster() {
+        return rosCore != null;
+    }
+
+    public URI getMasterUri() {
+        return this.masterUri;
+    }
+
+    public void setMasterUri(URI uri) {
+        this.masterUri = uri;
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent.getAction() == null) {
             return START_NOT_STICKY;
@@ -149,19 +169,12 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
         return binder;
     }
 
-    public URI getMasterUri() {
-        return masterUri;
-    }
-
-    public void setMasterUri(URI uri) {
-        masterUri = uri;
-    }
 
     @Deprecated
     public void startMaster() {
         rosCore = RosCore.newPublic(11311);
-        rosCore.start();
         try {
+            rosCore.start();
             rosCore.awaitStart();
         } catch (Exception e) {
             throw new RosRuntimeException(e);

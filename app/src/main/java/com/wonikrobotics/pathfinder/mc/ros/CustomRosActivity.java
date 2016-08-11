@@ -1,10 +1,12 @@
 package com.wonikrobotics.pathfinder.mc.ros;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -37,7 +39,7 @@ public abstract class CustomRosActivity extends Activity {
     public int PAUSE_STATE = 4;
     protected CustomNodeMainExecutorService nodeMainExecutorService;
     private boolean serviceConnection = false;
-    private URI MasterUri;
+    private URI MasterUri = null;
     private boolean is_Master = false;
 
 
@@ -51,6 +53,7 @@ public abstract class CustomRosActivity extends Activity {
     }
 
     protected void setURI(String uri, boolean master) {
+        Log.e("CustomRosActivity", "set URI" + uri);
         try {
             CustomRosActivity.this.MasterUri = new URI(uri);
             CustomRosActivity.this.is_Master = master;
@@ -65,6 +68,15 @@ public abstract class CustomRosActivity extends Activity {
         super.onStart();
     }
 
+    private boolean checkRunningServices() {
+        ActivityManager manager = (ActivityManager) this.getSystemService(Activity.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if ("com.wonikrobotics.pathfinder.mc.ros.CustomNodeMainExecutorService".equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
     private void startNodeMainExecutorService() {
         Intent intent = new Intent(this, CustomNodeMainExecutorService.class);
         intent.setAction(CustomNodeMainExecutorService.ACTION_START);
@@ -79,6 +91,7 @@ public abstract class CustomRosActivity extends Activity {
     public void onPause() {
         Log.e("on pause state", String.valueOf(PAUSE_STATE));
         if (PAUSE_STATE == PAUSE_WITH_STOP) {
+            Log.e("on pause state", "in pause with stop");
             try {
                 AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
 
@@ -122,6 +135,18 @@ public abstract class CustomRosActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("CONNECTION", serviceConnection);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        serviceConnection = savedInstanceState.getBoolean("CONNECTION", false);
+    }
+
     public int getPAUSE_STATE() {
         return this.PAUSE_STATE;
     }
@@ -129,6 +154,10 @@ public abstract class CustomRosActivity extends Activity {
     public void setPAUSE_STATE(int state) {
         PAUSE_STATE = state;
         Log.e("set pause state", String.valueOf(PAUSE_STATE));
+    }
+
+    public boolean getIs_Master() {
+        return this.is_Master;
     }
 
     public int getStateConnect() {
@@ -154,6 +183,8 @@ public abstract class CustomRosActivity extends Activity {
             // nodeMainExectuorService needs to be null for everything to be started
             // up again.
             nodeMainExecutorService = null;
+            MasterUri = null;
+            serviceConnection = false;
         }
     }
 
@@ -178,7 +209,6 @@ public abstract class CustomRosActivity extends Activity {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
-            serviceConnection = true;
             nodeMainExecutorService = ((CustomNodeMainExecutorService.LocalBinder) binder).getService();
             nodeMainExecutorService.addListener(new CustomNodeMainExecutorServiceListener() {
                 @Override
@@ -189,21 +219,23 @@ public abstract class CustomRosActivity extends Activity {
                 }
             });
             nodeMainExecutorService.setMasterUri(MasterUri);
-            if (is_Master) {
-                AsyncTask<Void, Void, URI> task = new AsyncTask<Void, Void, URI>() {
-                    @Override
-                    protected URI doInBackground(Void... params) {
-                        CustomRosActivity.this.nodeMainExecutorService.startMaster();
-                        return CustomRosActivity.this.nodeMainExecutorService.getMasterUri();
+            if (is_Master && !serviceConnection) {
+                if (!nodeMainExecutorService.hasMaster()) {
+                    try {
+                        AsyncTask<Void, Void, URI> task = new AsyncTask<Void, Void, URI>() {
+                            @Override
+                            protected URI doInBackground(Void... params) {
+                                CustomRosActivity.this.nodeMainExecutorService.startMaster();
+                                return CustomRosActivity.this.nodeMainExecutorService.getMasterUri();
+                            }
+                        };
+                        task.execute();
+                        CustomRosActivity.this.MasterUri = task.get();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
                     }
-                };
-                task.execute();
-                try {
-                    CustomRosActivity.this.MasterUri = task.get();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
                 }
             }
             new AsyncTask<Void, Void, Void>() {
@@ -213,6 +245,7 @@ public abstract class CustomRosActivity extends Activity {
                     return null;
                 }
             }.execute();
+            serviceConnection = true;
             STATE = STATE_CONNECTING;
             onStateChangeListener(STATE);
         }
@@ -220,7 +253,6 @@ public abstract class CustomRosActivity extends Activity {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.e("service disconnected", name.toString());
-            serviceConnection = false;
         }
     }
 

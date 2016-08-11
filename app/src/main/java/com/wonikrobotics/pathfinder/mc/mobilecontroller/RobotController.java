@@ -104,7 +104,7 @@ public class RobotController extends CustomRosActivity {
     private TextView robotNameTxt;
     private ImageView userOption;
     private int idx = -1;
-    private boolean resumeDialog = false;
+    private boolean resumeDialog = false, resumeLayout = false;
     private String robotNameStr;
     /**
      *   listeners
@@ -269,7 +269,7 @@ public class RobotController extends CustomRosActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
+        Log.e("ONRESUME START", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
         initData();
         Intent instance = getIntent();
         if (instance.hasExtra("NAME"))
@@ -278,24 +278,37 @@ public class RobotController extends CustomRosActivity {
             idx = instance.getIntExtra("IDX", -1);
         getUserOption(getIntent().getIntExtra("IDX", -1));
         setLayout(currentSelectedController);
-        Log.e("onresume", Boolean.toString(resumeDialog));
         if (!resumeDialog) {
+            Log.e("FLAG", "ON");
             if (instance.hasExtra("URL") && instance.hasExtra("MASTER"))
                 setURI(getIntent().getStringExtra("URL"), getIntent().getBooleanExtra("MASTER", false));
         }
-
+        Log.e("ONRESUME END", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
     }
 
     @Override
     public void onPause(){
         super.onPause();
+        Log.e("ONPAUSE START", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
         if (getPAUSE_STATE() == PAUSE_WITH_STOP) {
             if (cTimer != null) {
                 cTimer.shutDown();
                 cTimer = null;
             }
         }
+        Log.e("ONPAUSE END", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
     }
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        outState.putBoolean("resumeDialog",resumeDialog);
+//        super.onSaveInstanceState(outState);
+//    }
+//
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//        this.resumeDialog = savedInstanceState.getBoolean("resumeDialog",false);
+//    }
 
     private void onTimerFinished(){
         handler.post(new Runnable() {
@@ -330,6 +343,7 @@ public class RobotController extends CustomRosActivity {
         for (int i = 0; i < 8; ++i) {
             sonarValues[i] = 0.0f;
             sonarMinAngle[i] = 194 + 19 * i;
+//            sonarMinAngle[i] = 14 + 19 * i;
             sonarDrawAngle[i] = 19;
         }
     }
@@ -403,6 +417,7 @@ public class RobotController extends CustomRosActivity {
      * @param flag
      */
     private void setLayout(final int flag) {
+        Log.e("SETLAYOUT START", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
         innerScroll = new LinearLayout(RobotController.this);
         setPAUSE_STATE(PAUSE_WITHOUT_STOP);
         switch (flag) {
@@ -416,7 +431,9 @@ public class RobotController extends CustomRosActivity {
                     }
                 };
                 cameraView = new CameraView(this);
+                Log.e("BEFORE CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                Log.e("AFTER CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
                 setContentView(R.layout.robotcontroller_vertical);
                 viewContents = (LinearLayout) findViewById(R.id.view_contents);
                 robotNameTxt = (TextView) findViewById(R.id.controllerRobotName);
@@ -433,6 +450,7 @@ public class RobotController extends CustomRosActivity {
                 horizontalScroll.post(new Runnable() {
                     @Override
                     public void run() {
+                        Log.e("SETLAYOUT POST START", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
                         switch (getStateConnect()) {
                             case STATE_CONNECTED:
                                 connectionState.setImageResource(R.drawable.connected);
@@ -549,10 +567,10 @@ public class RobotController extends CustomRosActivity {
                                 }
                             });
                         }
-                        if (!resumeDialog)
-                            setPAUSE_STATE(PAUSE_WITH_STOP);
-                        else
+                        setPAUSE_STATE(PAUSE_WITH_STOP);
+                        if (resumeDialog)
                             resumeDialog = false;
+                        Log.e("SETLAYOUT POST END", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
                     }
 
                 });
@@ -568,7 +586,9 @@ public class RobotController extends CustomRosActivity {
                     }
                 };
                 cameraView = new CameraView(this);
+                Log.e("BEFORE CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+                Log.e("AFTER CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
                 setContentView(R.layout.robotcontroller_horizontal);
                 viewContents = (LinearLayout) findViewById(R.id.view_contents);
                 robotNameTxt = (TextView) findViewById(R.id.controllerRobotName);
@@ -587,6 +607,7 @@ public class RobotController extends CustomRosActivity {
                 verticalScroll.post(new Runnable() {
                     @Override
                     public void run() {
+                        Log.e("SETLAYOUT POST START", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
                         switch (getStateConnect()) {
                             case STATE_CONNECTED:
                                 connectionState.setImageResource(R.drawable.connected);
@@ -621,7 +642,9 @@ public class RobotController extends CustomRosActivity {
                         Spinner sonarOption = (Spinner) sonaroption.findViewById(R.id.sonar_rangeoption);
                         sonarOption.setOnItemSelectedListener(sonar_range_Selected);
                         sonarView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
-                        innerScroll.addView(sonarView);
+                        sonarFrame.addView(sonarView);
+                        sonarFrame.addView(sonaroption);
+                        innerScroll.addView(sonarFrame);
                         ImageView sonar_icon = new ImageView(viewContents.getContext());
                         sonar_icon.setImageResource(R.drawable.sonar);
                         sonar_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
@@ -700,16 +723,17 @@ public class RobotController extends CustomRosActivity {
                                 }
                             });
                         }
-                        if (!resumeDialog)
-                            setPAUSE_STATE(PAUSE_WITH_STOP);
-                        else
+                        setPAUSE_STATE(PAUSE_WITH_STOP);
+                        if (resumeDialog)
                             resumeDialog = false;
+                        Log.e("SETLAYOUT POST END", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
                     }
                 });
                 break;
             default:
                 break;
         }
+        Log.e("SETLAYOUT END", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
     }
 
     private void getUserOption(int idx) {
@@ -751,7 +775,6 @@ public class RobotController extends CustomRosActivity {
                 connectionState.setImageResource(R.drawable.connecting);
                 break;
             case STATE_DISCONNECTED:
-                Log.e("disconnected", "on listener");
                 connectionState.setImageResource(R.drawable.disconnected);
                 break;
             case STATE_UNREGISTERING:
@@ -762,7 +785,7 @@ public class RobotController extends CustomRosActivity {
 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
-        setPAUSE_STATE(PAUSE_WITHOUT_STOP);
+        Log.e("INIT START", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
         NodeConfiguration nodeConfiguration =
                 NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress());
         nodeConfiguration.setMasterUri(getMasterUri());
@@ -795,8 +818,8 @@ public class RobotController extends CustomRosActivity {
         };
 
 
-        CustomPublisher velocityPublisher = new CustomPublisher("mobile_base/commands/velocity",
-//        CustomPublisher velocityPublisher = new CustomPublisher("cmd_vel",
+        CustomPublisher velocityPublisher = new CustomPublisher("cmd_vel",
+//        CustomPublisher velocityPublisher = new CustomPublisher("mobile_base/commands/velocity",
                 geometry_msgs.Twist._TYPE, 100) {
             @Override
             public void publishingRoutine(Publisher publisher, ConnectedNode connectedNode) {
@@ -851,7 +874,8 @@ public class RobotController extends CustomRosActivity {
         };
         androidNode.addSubscriber(laserSubscriber);
 
-        CustomSubscriber cameraSubscriber = new CustomSubscriber("camera/rgb/image_raw/compressed", sensor_msgs.CompressedImage._TYPE) {
+        CustomSubscriber cameraSubscriber = new CustomSubscriber("image/compressed", sensor_msgs.CompressedImage._TYPE) {
+            //        CustomSubscriber cameraSubscriber = new CustomSubscriber("camera/rgb/image_raw/compressed", sensor_msgs.CompressedImage._TYPE) {
             @Override
             public void subscribingRoutine(Message message) {
                 BitmapFromCompressedImage bfci = new BitmapFromCompressedImage();
@@ -875,16 +899,17 @@ public class RobotController extends CustomRosActivity {
         };
 
         androidNode.addSubscriber(timerSubscriber);
-
         nodeMainExecutor.execute(androidNode, nodeConfiguration);
-        if (cTimer == null) {
-            cTimer = new ConnectionTimer(5) {
-                @Override
-                public void onTimerFinished() {
-                    RobotController.this.onTimerFinished();
-                }
-            };
-            cTimer.start();
+        if (!getIs_Master()) {
+            if (cTimer == null) {
+                cTimer = new ConnectionTimer(10) {
+                    @Override
+                    public void onTimerFinished() {
+                        RobotController.this.onTimerFinished();
+                    }
+                };
+                cTimer.start();
+            }
         }
     }
 

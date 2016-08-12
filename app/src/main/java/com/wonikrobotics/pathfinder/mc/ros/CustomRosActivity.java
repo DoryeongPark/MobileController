@@ -41,6 +41,7 @@ public abstract class CustomRosActivity extends Activity {
     private boolean serviceConnection = false;
     private URI MasterUri = null;
     private boolean is_Master = false;
+    private IBinder bundleBinder = null;
 
 
     protected CustomRosActivity() {
@@ -138,6 +139,7 @@ public abstract class CustomRosActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBoolean("CONNECTION", serviceConnection);
+        outState.putBinder("BINDER", bundleBinder);
         super.onSaveInstanceState(outState);
     }
 
@@ -145,6 +147,7 @@ public abstract class CustomRosActivity extends Activity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         serviceConnection = savedInstanceState.getBoolean("CONNECTION", false);
+        bundleBinder = savedInstanceState.getBinder("BINDER");
     }
 
     public int getPAUSE_STATE() {
@@ -209,7 +212,11 @@ public abstract class CustomRosActivity extends Activity {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
-            nodeMainExecutorService = ((CustomNodeMainExecutorService.LocalBinder) binder).getService();
+            if (bundleBinder == null)
+                bundleBinder = binder;
+            else
+                Log.e("BUNDLE", Boolean.toString(bundleBinder.pingBinder()));
+            nodeMainExecutorService = ((CustomNodeMainExecutorService.LocalBinder) bundleBinder).getService();
             nodeMainExecutorService.addListener(new CustomNodeMainExecutorServiceListener() {
                 @Override
                 public void onShutdown(CustomNodeMainExecutorService nodeMainExecutorService) {

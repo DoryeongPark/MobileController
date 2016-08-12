@@ -98,22 +98,22 @@ public abstract class LaserSensorView extends View {
                 canvas.drawCircle(width / 2f, height / 2f, radius * 0.6f, line);
                 canvas.drawCircle(width / 2f, height / 2f, radius * 0.4f, line);
                 canvas.drawCircle(width / 2f, height / 2f, radius * 0.2f, line);
-                canvas.drawText(Integer.toString(Math.round(max_val * 1.0f)), width / 2f - (radius * 1.0f), height / 2f, paint);
-                canvas.drawText(Integer.toString(Math.round(max_val * 0.8f)), width / 2f - (radius * 0.8f), height / 2f, paint);
-                canvas.drawText(Integer.toString(Math.round(max_val * 0.6f)), width / 2f - (radius * 0.6f), height / 2f, paint);
-                canvas.drawText(Integer.toString(Math.round(max_val * 0.4f)), width / 2f - (radius * 0.4f), height / 2f, paint);
-                canvas.drawText(Integer.toString(Math.round(max_val * 0.2f)), width / 2f - (radius * 0.2f), height / 2f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 1.0f) / 10f), width / 2f - (radius * 1.0f), height / 2f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.8f) / 10f), width / 2f - (radius * 0.8f), height / 2f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.6f) / 10f), width / 2f - (radius * 0.6f), height / 2f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.4f) / 10f), width / 2f - (radius * 0.4f), height / 2f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.2f) / 10f), width / 2f - (radius * 0.2f), height / 2f, paint);
             } else if (currentRange == FRONT_OF_ROBOT) {
                 canvas.drawCircle(width / 2f, height, radius * 1.0f, line);
                 canvas.drawCircle(width / 2f, height, radius * 0.8f, line);
                 canvas.drawCircle(width / 2f, height, radius * 0.6f, line);
                 canvas.drawCircle(width / 2f, height, radius * 0.4f, line);
                 canvas.drawCircle(width / 2f, height, radius * 0.2f, line);
-                canvas.drawText(Integer.toString(Math.round(max_val * 1.0f)), width / 2f, height - (radius * 1.0f), paint);
-                canvas.drawText(Integer.toString(Math.round(max_val * 0.8f)), width / 2f, height - (radius * 0.8f), paint);
-                canvas.drawText(Integer.toString(Math.round(max_val * 0.6f)), width / 2f, height - (radius * 0.6f), paint);
-                canvas.drawText(Integer.toString(Math.round(max_val * 0.4f)), width / 2f, height - (radius * 0.4f), paint);
-                canvas.drawText(Integer.toString(Math.round(max_val * 0.2f)), width / 2f, height - (radius * 0.2f), paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 1.0f) / 10f), width / 2f, height - (radius * 1.0f), paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.8f) / 10f), width / 2f, height - (radius * 0.8f), paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.6f) / 10f), width / 2f, height - (radius * 0.6f), paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.4f) / 10f), width / 2f, height - (radius * 0.4f), paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.2f) / 10f), width / 2f, height - (radius * 0.2f), paint);
             }
 
 
@@ -286,20 +286,39 @@ public abstract class LaserSensorView extends View {
 
     public void setDisplayRangeMode(int mode) {
         this.currentRange = mode;
+        invalidate();
     }
 
     public void setDiplayMode(int mode) {
         this.currentDisplay = mode;
+        invalidate();
     }
 
     public void setLaserPaint(Paint p) {
         this.laser = p;
+        invalidate();
     }
 
     public void setPointPaint(Paint p) {
         this.point = p;
+        invalidate();
     }
 
+    public void zoomIn() {
+        max_val = max_val * 0.9f;
+        this.onMaxValChanged(max_val);
+        autoResizing = false;
+        if (resizeChangeListener != null)
+            resizeChangeListener.onChange(autoResizing);
+    }
+
+    public void zoomOut() {
+        max_val = max_val * 1.1f;
+        this.onMaxValChanged(max_val);
+        autoResizing = false;
+        if (resizeChangeListener != null)
+            resizeChangeListener.onChange(autoResizing);
+    }
     @Override
     public boolean onTouchEvent(MotionEvent e) {
         switch (e.getAction() & MotionEvent.ACTION_MASK) {

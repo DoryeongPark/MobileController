@@ -19,12 +19,12 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="0px"
-        android:layout_weight="0.2" />
+        android:layout_weight="0.5" />
     <ImageView
         android:id="@+id/robotics"
         android:layout_width="match_parent"
         android:layout_height="0px"
-        android:layout_weight="0.7"
+        android:layout_weight="0.5"
         android:scaleType="centerInside"
         android:src="@drawable/robotics" />
 

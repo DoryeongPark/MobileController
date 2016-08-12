@@ -1,14 +1,20 @@
 package com.wonikrobotics.pathfinder.mc.mobilecontroller;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,7 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -66,7 +72,6 @@ public class RobotController extends CustomRosActivity {
     /**
      * define layout and views for scroll the sensor views
      **/
-    private ScrollView verticalScroll;
     private HorizontalScrollView horizontalScroll;
     private LinearLayout innerScroll;
     /**
@@ -87,9 +92,21 @@ public class RobotController extends CustomRosActivity {
     private int[] sonarMinAngle, sonarDrawAngle;
     private SonarSensorView sonarView;
     private CameraView cameraView;
+    private LaserSensorView laserView;
+    View.OnClickListener zoom = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.laser_zoomin:
+                    laserView.zoomIn();
+                    break;
+                case R.id.laser_zoomout:
+                    laserView.zoomOut();
+                    break;
+            }
+        }
+    };
     private ImageView connectionState;
-    private ImageView verticalLeftArrow;
-    private ImageView verticalRightArrow;
     private ImageView horizontalLeftArrow;
     private ImageView horizontalRightArrow;
     private LinearLayout viewContents;
@@ -143,7 +160,6 @@ public class RobotController extends CustomRosActivity {
                 sonarView.setScale(SonarSensorView.AROUND_ROBOT);
         }
     };
-    private LaserSensorView laserView;
     private AdapterView.OnItemSelectedListener laser_range_Selected = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -257,7 +273,8 @@ public class RobotController extends CustomRosActivity {
     private View.OnTouchListener scrollEvent = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            return event.getPointerCount() > 1;
+//            return event.getPointerCount() > 1;
+            return true;
         }
     };
 
@@ -280,8 +297,20 @@ public class RobotController extends CustomRosActivity {
         setLayout(currentSelectedController);
         if (!resumeDialog) {
             Log.e("FLAG", "ON");
-            if (instance.hasExtra("URL") && instance.hasExtra("MASTER"))
-                setURI(getIntent().getStringExtra("URL"), getIntent().getBooleanExtra("MASTER", false));
+            if (instance.hasExtra("URL") && instance.hasExtra("MASTER")) {
+                if (instance.getBooleanExtra("MASTER", false)) {
+                    Log.e("TAG", "IN");
+                    NetworkInfo wifi = ((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE)).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                    if (wifi.isAvailable()) {
+                        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+                        WifiInfo info = wifiManager.getConnectionInfo();
+                        int ip = info.getIpAddress();
+                        setURI("http://" + Formatter.formatIpAddress(ip) + ":11311", true);
+                    }
+                } else {
+                    setURI(getIntent().getStringExtra("URL"), getIntent().getBooleanExtra("MASTER", false));
+                }
+            }
         }
         Log.e("ONRESUME END", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
     }
@@ -379,155 +408,174 @@ public class RobotController extends CustomRosActivity {
         });
     }
 
-    private void addEventForVerticalArrows() {
-        verticalLeftArrow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int viewPoint = innerScroll.getHeight();
-                int currentPoint = verticalScroll.getScrollY();
-                for (int i = 0; i < innerScroll.getChildCount(); ++i) {
-                    viewPoint = viewPoint - verticalScroll.getHeight();
-                    if (viewPoint < currentPoint) {
-                        verticalScroll.smoothScrollTo(0, viewPoint);
-                        break;
-                    }
-                }
-            }
-        });
-
-        verticalRightArrow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int viewPoint = 0;
-                int currentPoint = verticalScroll.getScrollY();
-                for (int i = 0; i < innerScroll.getChildCount(); ++i) {
-                    if (viewPoint > currentPoint) {
-                        verticalScroll.smoothScrollTo(0, viewPoint);
-                        break;
-                    }
-                    viewPoint = viewPoint + verticalScroll.getHeight();
-                }
-            }
-        });
-    }
-
     /**
      * method for change layout
      *
      * @param flag
      */
+    private void initViews(int flag) {
+        sonarView = new SonarSensorView(this, sonarValues, sonarMinAngle, sonarDrawAngle);
+        sonarView.setScale(SonarSensorView.AROUND_ROBOT);
+        laserView = new LaserSensorView(this) {
+            @Override
+            public void onMaxValChanged(float val) {
+            }
+        };
+        cameraView = new CameraView(this);
+        if (flag == CONTROLLER_HORIZONTAL_DOUBLELEVER || flag == CONTROLLER_HORIZONTAL_STEER) {
+            Log.e("BEFORE CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+            Log.e("AFTER CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
+            setContentView(R.layout.robotcontroller_horizontal);
+            leftCtrLayout = (LinearLayout) findViewById(R.id.left_control_layout);
+            rightCtrLayout = (LinearLayout) findViewById(R.id.right_control_layout);
+        } else {
+            Log.e("BEFORE CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            Log.e("AFTER CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
+            setContentView(R.layout.robotcontroller_vertical);
+            joystickLayout = (LinearLayout) findViewById(R.id.robotController_joystickLayout);
+        }
+        viewContents = (LinearLayout) findViewById(R.id.view_contents);
+        robotNameTxt = (TextView) findViewById(R.id.controllerRobotName);
+        velocityDisplayLayout = (LinearLayout) findViewById(R.id.velocity_display_layout);
+        robotNameTxt.setText(robotNameStr);
+        userOption = (ImageView) findViewById(R.id.controllerUserOption);
+        userOption.setOnClickListener(optionClickListener);
+        connectionState = (ImageView) findViewById(R.id.connection_state);
+        velocityDisplayer = new VelocityDisplay(RobotController.this);
+
+        horizontalScroll = (HorizontalScrollView) findViewById(R.id.horizontalScroll);
+        horizontalLeftArrow = (ImageView) findViewById(R.id.horizontalLeftArrow);
+        horizontalRightArrow = (ImageView) findViewById(R.id.horizontalRightArrow);
+        addEventForHorrizontalArrows();
+    }
+
+    private void addSensorViews(HorizontalScrollView scroll, int flag, Context context) {
+        /**********************************************     연결 상태    *********************************************************/
+        switch (getStateConnect()) {
+            case STATE_CONNECTED:
+                connectionState.setImageResource(R.drawable.connected);
+                break;
+            case STATE_CONNECTING:
+                connectionState.setImageResource(R.drawable.connecting);
+                break;
+            case STATE_DISCONNECTED:
+                connectionState.setImageResource(R.drawable.disconnected);
+                break;
+            case STATE_UNREGISTERING:
+                connectionState.setImageResource(R.drawable.disconnecting);
+                break;
+        }
+        /*********************************************   아이콘  뷰   ********************************************************/
+        ImageView camera_icon = new ImageView(viewContents.getContext());
+        camera_icon.setImageResource(R.drawable.camera);
+        camera_icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        camera_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
+        viewContents.addView(camera_icon);
+        ImageView sonar_icon = new ImageView(viewContents.getContext());
+        sonar_icon.setImageResource(R.drawable.sonar);
+        sonar_icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        sonar_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
+        viewContents.addView(sonar_icon);
+        ImageView laser_icon = new ImageView(viewContents.getContext());
+        laser_icon.setImageResource(R.drawable.laser);
+        laser_icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        laser_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
+        viewContents.addView(laser_icon);
+        /*********************************************   속도 표시 뷰   ********************************************************/
+        velocityDisplayLayout.removeAllViews();
+        velocityDisplayLayout.addView(velocityDisplayer);
+        /*********************************************   Container 뷰   ********************************************************/
+        innerScroll = new LinearLayout(context);
+        if (flag == CONTROLLER_VERTICAL_RTHETA || flag == CONTROLLER_VERTICAL_YTHETA)
+            innerScroll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        else
+            innerScroll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        /**********************************************    카메라 뷰    *********************************************************/
+        if (cameraView.getParent() != null)
+            ((ViewGroup) cameraView.getParent()).removeAllViews();
+        cameraView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        cameraView.setLayoutParams(new LinearLayout.LayoutParams(scroll.getWidth(), scroll.getHeight()));
+        innerScroll.addView(cameraView);
+        /**********************************************     Sonar 뷰    *********************************************************/
+        FrameLayout sonarFrame = new FrameLayout(context);
+        sonarFrame.setLayoutParams(new FrameLayout.LayoutParams(scroll.getWidth(), scroll.getHeight()));
+        RelativeLayout sonaroption = (RelativeLayout) getLayoutInflater().inflate(R.layout.sonaroption, null);
+        sonaroption.setLayoutParams(new RelativeLayout.LayoutParams(scroll.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT));
+        Spinner sonarOption = (Spinner) sonaroption.findViewById(R.id.sonar_rangeoption);
+        sonarOption.setOnItemSelectedListener(sonar_range_Selected);
+        sonarView.setLayoutParams(new LinearLayout.LayoutParams(scroll.getWidth(), scroll.getHeight()));
+        ImageView sonarzoomin = (ImageView) sonaroption.findViewById(R.id.sonar_zoomin);
+        ImageView sonarzoomout = (ImageView) sonaroption.findViewById(R.id.sonar_zoomout);
+        RelativeLayout.LayoutParams inparams = new RelativeLayout.LayoutParams(scroll.getWidth() / 4, scroll.getWidth() / 4);
+        inparams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        inparams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+        sonarzoomin.setLayoutParams(inparams);
+        RelativeLayout.LayoutParams outparams = new RelativeLayout.LayoutParams(scroll.getWidth() / 4, scroll.getWidth() / 4);
+        outparams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        outparams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        sonarzoomout.setLayoutParams(outparams);
+        sonarzoomin.setOnClickListener(zoom);
+        sonarzoomout.setOnClickListener(zoom);
+        sonarFrame.addView(sonarView);
+        sonarFrame.addView(sonaroption);
+        innerScroll.addView(sonarFrame);
+        /**********************************************     Laser 뷰    *********************************************************/
+        FrameLayout laserFrame = new FrameLayout(context);
+        laserFrame.setLayoutParams(new FrameLayout.LayoutParams(scroll.getWidth(), scroll.getHeight()));
+        laserView.setLayoutParams(new LinearLayout.LayoutParams(scroll.getWidth(), scroll.getHeight()));
+        laserView.setDisplayRangeMode(LaserSensorView.AROUND_ROBOT);
+        laserView.setDiplayMode(LaserSensorView.POINT_CLOUD);
+        RelativeLayout laseroption = (RelativeLayout) getLayoutInflater().inflate(R.layout.laseroption, null);
+        laseroption.setLayoutParams(new RelativeLayout.LayoutParams(scroll.getWidth(), scroll.getHeight()));
+        final ToggleButton resize = (ToggleButton) laseroption.findViewById(R.id.laser_autoresize);
+        resize.setChecked(true);
+        resize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                laserView.setAutoResizing(isChecked);
+            }
+        });
+        laserView.setOnAutoResizeChangeListener(new LaserSensorView.OnAutoResizeChangeListener() {
+            @Override
+            public void onChange(boolean onOff) {
+                resize.setChecked(onOff);
+            }
+        });
+        Spinner visibleRangeOption = (Spinner) laseroption.findViewById(R.id.laser_displayrange);
+        visibleRangeOption.setOnItemSelectedListener(laser_range_Selected);
+        Spinner laserDisplayOption = (Spinner) laseroption.findViewById(R.id.laser_displaymode);
+        laserDisplayOption.setOnItemSelectedListener(laser_displayMode_Selected);
+        ImageView zoomin = (ImageView) laseroption.findViewById(R.id.laser_zoomin);
+        ImageView zoomout = (ImageView) laseroption.findViewById(R.id.laser_zoomout);
+        zoomin.setLayoutParams(inparams);
+        zoomout.setLayoutParams(outparams);
+        zoomin.setOnClickListener(zoom);
+        zoomout.setOnClickListener(zoom);
+        laserFrame.addView(laserView);
+        laserFrame.addView(laseroption);
+
+        /**********************************************     뷰 추가     *********************************************************/
+        innerScroll.addView(laserFrame);
+        scroll.removeAllViews();
+        scroll.addView(innerScroll);
+        scroll.setOnTouchListener(scrollEvent);
+    }
     private void setLayout(final int flag) {
         Log.e("SETLAYOUT START", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
         innerScroll = new LinearLayout(RobotController.this);
         setPAUSE_STATE(PAUSE_WITHOUT_STOP);
+        initViews(flag);
         switch (flag) {
             case RobotController.CONTROLLER_VERTICAL_RTHETA:
             case RobotController.CONTROLLER_VERTICAL_YTHETA:
-                sonarView = new SonarSensorView(this, sonarValues, sonarMinAngle, sonarDrawAngle);
-                sonarView.setScale(SonarSensorView.AROUND_ROBOT);
-                laserView = new LaserSensorView(this) {
-                    @Override
-                    public void onMaxValChanged(float val) {
-                    }
-                };
-                cameraView = new CameraView(this);
-                Log.e("BEFORE CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                Log.e("AFTER CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
-                setContentView(R.layout.robotcontroller_vertical);
-                viewContents = (LinearLayout) findViewById(R.id.view_contents);
-                robotNameTxt = (TextView) findViewById(R.id.controllerRobotName);
-                userOption = (ImageView) findViewById(R.id.controllerUserOption);
-                userOption.setOnClickListener(optionClickListener);
-                connectionState = (ImageView) findViewById(R.id.connection_state);
-                velocityDisplayLayout = (LinearLayout) findViewById(R.id.velocity_display_layout);
-                joystickLayout = (LinearLayout) findViewById(R.id.robotController_joystickLayout);
-                velocityDisplayer = new VelocityDisplay(RobotController.this);
-                robotNameTxt.setText(robotNameStr);
-                horizontalScroll = (HorizontalScrollView) findViewById(R.id.horizontalScroll);
-                horizontalLeftArrow = (ImageView) findViewById(R.id.horizontalLeftArrow);
-                horizontalRightArrow = (ImageView) findViewById(R.id.horizontalRightArrow);
                 horizontalScroll.post(new Runnable() {
                     @Override
                     public void run() {
                         Log.e("SETLAYOUT POST START", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
-                        switch (getStateConnect()) {
-                            case STATE_CONNECTED:
-                                connectionState.setImageResource(R.drawable.connected);
-                                break;
-                            case STATE_CONNECTING:
-                                connectionState.setImageResource(R.drawable.connecting);
-                                break;
-                            case STATE_DISCONNECTED:
-                                connectionState.setImageResource(R.drawable.disconnected);
-                                break;
-                            case STATE_UNREGISTERING:
-                                connectionState.setImageResource(R.drawable.disconnecting);
-                                break;
-                        }
-                        velocityDisplayLayout.removeAllViews();
-                        velocityDisplayLayout.addView(velocityDisplayer);
-                        innerScroll = new LinearLayout(horizontalScroll.getContext());
-                        innerScroll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                        if (cameraView.getParent() != null)
-                            ((ViewGroup) cameraView.getParent()).removeAllViews();
-                        cameraView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                        cameraView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
-                        innerScroll.addView(cameraView);
-                        ImageView camera_icon = new ImageView(viewContents.getContext());
-                        camera_icon.setImageResource(R.drawable.camera);
-                        camera_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
-                        viewContents.addView(camera_icon);
-                        FrameLayout sonarFrame = new FrameLayout(horizontalScroll.getContext());
-                        sonarFrame.setLayoutParams(new FrameLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
-                        LinearLayout sonaroption = (LinearLayout) getLayoutInflater().inflate(R.layout.sonaroption, null);
-                        sonaroption.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT));
-                        Spinner sonarOption = (Spinner) sonaroption.findViewById(R.id.sonar_rangeoption);
-                        sonarOption.setOnItemSelectedListener(sonar_range_Selected);
-                        sonarView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
-                        sonarFrame.addView(sonarView);
-                        sonarFrame.addView(sonaroption);
-                        innerScroll.addView(sonarFrame);
-                        ImageView sonar_icon = new ImageView(viewContents.getContext());
-                        sonar_icon.setImageResource(R.drawable.sonar);
-                        sonar_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
-                        viewContents.addView(sonar_icon);
-                        FrameLayout laserFrame = new FrameLayout(horizontalScroll.getContext());
-                        laserFrame.setLayoutParams(new FrameLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
-                        laserView.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), horizontalScroll.getHeight()));
-                        laserView.setDisplayRangeMode(LaserSensorView.AROUND_ROBOT);
-                        laserView.setDiplayMode(LaserSensorView.POINT_CLOUD);
-                        LinearLayout laseroption = (LinearLayout) getLayoutInflater().inflate(R.layout.laseroption, null);
-                        laseroption.setLayoutParams(new LinearLayout.LayoutParams(horizontalScroll.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT));
-                        final ToggleButton resize = (ToggleButton) laseroption.findViewById(R.id.laser_autoresize);
-                        resize.setChecked(true);
-                        resize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                            @Override
-                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                laserView.setAutoResizing(isChecked);
-                            }
-                        });
-                        laserView.setOnAutoResizeChangeListener(new LaserSensorView.OnAutoResizeChangeListener() {
-                            @Override
-                            public void onChange(boolean onOff) {
-                                resize.setChecked(onOff);
-                            }
-                        });
-                        Spinner visibleRangeOption = (Spinner) laseroption.findViewById(R.id.laser_displayrange);
-                        visibleRangeOption.setOnItemSelectedListener(laser_range_Selected);
-                        Spinner laserDisplayOption = (Spinner) laseroption.findViewById(R.id.laser_displaymode);
-                        laserDisplayOption.setOnItemSelectedListener(laser_displayMode_Selected);
-                        laserFrame.addView(laserView);
-                        laserFrame.addView(laseroption);
-                        innerScroll.addView(laserFrame);
-                        ImageView laser_icon = new ImageView(viewContents.getContext());
-                        laser_icon.setImageResource(R.drawable.laser);
-                        laser_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
-                        viewContents.addView(laser_icon);
-                        horizontalScroll.removeAllViews();
-                        horizontalScroll.addView(innerScroll);
-                        horizontalScroll.setOnTouchListener(scrollEvent);
-                        addEventForHorrizontalArrows();
+                        addSensorViews(horizontalScroll, flag, horizontalScroll.getContext());
+
                         Rect joystickArea = new Rect();
                         joystickLayout.getGlobalVisibleRect(joystickArea);
                         if (joystickLayout.getWidth() > joystickLayout.getHeight()) {
@@ -578,112 +626,11 @@ public class RobotController extends CustomRosActivity {
                 break;
             case RobotController.CONTROLLER_HORIZONTAL_STEER:
             case RobotController.CONTROLLER_HORIZONTAL_DOUBLELEVER:
-                sonarView = new SonarSensorView(this, sonarValues, sonarMinAngle, sonarDrawAngle);
-                sonarView.setScale(SonarSensorView.AROUND_ROBOT);
-                laserView = new LaserSensorView(this) {
-                    @Override
-                    public void onMaxValChanged(float val) {
-                    }
-                };
-                cameraView = new CameraView(this);
-                Log.e("BEFORE CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-                Log.e("AFTER CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
-                setContentView(R.layout.robotcontroller_horizontal);
-                viewContents = (LinearLayout) findViewById(R.id.view_contents);
-                robotNameTxt = (TextView) findViewById(R.id.controllerRobotName);
-                velocityDisplayLayout = (LinearLayout) findViewById(R.id.velocity_display_layout);
-                leftCtrLayout = (LinearLayout) findViewById(R.id.left_control_layout);
-                rightCtrLayout = (LinearLayout) findViewById(R.id.right_control_layout);
-                robotNameTxt.setText(robotNameStr);
-                userOption = (ImageView) findViewById(R.id.controllerUserOption);
-                userOption.setOnClickListener(optionClickListener);
-                connectionState = (ImageView) findViewById(R.id.connection_state);
-                velocityDisplayer = new VelocityDisplay(RobotController.this);
-                verticalScroll = (ScrollView) findViewById(R.id.verticalScroll);
-                verticalLeftArrow = (ImageView) findViewById(R.id.verticalLeftArrow);
-                verticalRightArrow = (ImageView) findViewById(R.id.verticalRightArrow);
-                verticalScroll.setOnTouchListener(scrollEvent);
-                verticalScroll.post(new Runnable() {
+                horizontalScroll.post(new Runnable() {
                     @Override
                     public void run() {
                         Log.e("SETLAYOUT POST START", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
-                        switch (getStateConnect()) {
-                            case STATE_CONNECTED:
-                                connectionState.setImageResource(R.drawable.connected);
-                                break;
-                            case STATE_CONNECTING:
-                                connectionState.setImageResource(R.drawable.connecting);
-                                break;
-                            case STATE_DISCONNECTED:
-                                connectionState.setImageResource(R.drawable.disconnected);
-                                break;
-                            case STATE_UNREGISTERING:
-                                connectionState.setImageResource(R.drawable.disconnecting);
-                                break;
-                        }
-                        velocityDisplayLayout.removeAllViews();
-                        velocityDisplayLayout.addView(velocityDisplayer);
-                        innerScroll = new LinearLayout(verticalScroll.getContext());
-                        innerScroll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                        innerScroll.setOrientation(LinearLayout.VERTICAL);
-                        if (cameraView.getParent() != null)
-                            ((ViewGroup) cameraView.getParent()).removeAllViews();
-                        cameraView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
-                        innerScroll.addView(cameraView);
-                        ImageView camera_icon = new ImageView(viewContents.getContext());
-                        camera_icon.setImageResource(R.drawable.camera);
-                        camera_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
-                        viewContents.addView(camera_icon);
-                        FrameLayout sonarFrame = new FrameLayout(verticalScroll.getContext());
-                        sonarFrame.setLayoutParams(new FrameLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
-                        LinearLayout sonaroption = (LinearLayout) getLayoutInflater().inflate(R.layout.sonaroption, null);
-                        sonaroption.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT));
-                        Spinner sonarOption = (Spinner) sonaroption.findViewById(R.id.sonar_rangeoption);
-                        sonarOption.setOnItemSelectedListener(sonar_range_Selected);
-                        sonarView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
-                        sonarFrame.addView(sonarView);
-                        sonarFrame.addView(sonaroption);
-                        innerScroll.addView(sonarFrame);
-                        ImageView sonar_icon = new ImageView(viewContents.getContext());
-                        sonar_icon.setImageResource(R.drawable.sonar);
-                        sonar_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
-                        viewContents.addView(sonar_icon);
-                        FrameLayout laserFrame = new FrameLayout(verticalScroll.getContext());
-                        laserFrame.setLayoutParams(new FrameLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
-                        laserView.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(), verticalScroll.getHeight()));
-                        laserView.setDisplayRangeMode(LaserSensorView.FRONT_OF_ROBOT);
-                        laserView.setDiplayMode(LaserSensorView.POINT_CLOUD);
-                        LinearLayout laseroption = (LinearLayout) getLayoutInflater().inflate(R.layout.laseroption, null);
-                        laseroption.setLayoutParams(new LinearLayout.LayoutParams(verticalScroll.getWidth(), ViewGroup.LayoutParams.WRAP_CONTENT));
-                        final ToggleButton resize = (ToggleButton) laseroption.findViewById(R.id.laser_autoresize);
-                        resize.setChecked(true);
-                        resize.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                            @Override
-                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                laserView.setAutoResizing(isChecked);
-                            }
-                        });
-                        laserView.setOnAutoResizeChangeListener(new LaserSensorView.OnAutoResizeChangeListener() {
-                            @Override
-                            public void onChange(boolean onOff) {
-                                resize.setChecked(onOff);
-                            }
-                        });
-                        Spinner visibleRangeOption = (Spinner) laseroption.findViewById(R.id.laser_displayrange);
-                        visibleRangeOption.setOnItemSelectedListener(laser_range_Selected);
-                        Spinner laserDisplayOption = (Spinner) laseroption.findViewById(R.id.laser_displaymode);
-                        laserDisplayOption.setOnItemSelectedListener(laser_displayMode_Selected);
-                        laserFrame.addView(laserView);
-                        laserFrame.addView(laseroption);
-                        innerScroll.addView(laserFrame);
-                        ImageView laser_icon = new ImageView(viewContents.getContext());
-                        laser_icon.setImageResource(R.drawable.laser);
-                        laser_icon.setLayoutParams(new ViewGroup.LayoutParams(viewContents.getHeight(), viewContents.getHeight()));
-                        viewContents.addView(laser_icon);
-                        verticalScroll.removeAllViews();
-                        verticalScroll.addView(innerScroll);
-                        addEventForVerticalArrows();
+                        addSensorViews(horizontalScroll, flag, horizontalScroll.getContext());
                         leftCtrLayout.removeAllViews();
                         rightCtrLayout.removeAllViews();
                         if (flag == RobotController.CONTROLLER_HORIZONTAL_STEER) {
@@ -892,7 +839,6 @@ public class RobotController extends CustomRosActivity {
         CustomSubscriber timerSubscriber = new CustomSubscriber("clock", rosgraph_msgs.Clock._TYPE){
             @Override
             public void subscribingRoutine(Message message) {
-
                 if(cTimer != null)
                     cTimer.getHeartBeat();
             }

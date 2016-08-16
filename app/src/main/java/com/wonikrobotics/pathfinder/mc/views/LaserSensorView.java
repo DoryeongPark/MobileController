@@ -1,8 +1,5 @@
 package com.wonikrobotics.pathfinder.mc.views;
 
-/**
- * Created by Felix on 2016-08-03.
- */
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -14,7 +11,12 @@ import android.view.MotionEvent;
 import android.view.View;
 
 /**
- * Created by Notebook on 2016-07-13.
+ * LaserSensorView
+ *
+ * @author      Weonwoo Joo
+ * @date        1. 8. 2016
+ *
+ * @description View visualizing laser sensor data
  */
 public abstract class LaserSensorView extends View {
     public static final int AROUND_ROBOT = 1;

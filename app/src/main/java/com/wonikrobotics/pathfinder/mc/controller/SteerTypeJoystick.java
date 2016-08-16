@@ -2,7 +2,6 @@ package com.wonikrobotics.pathfinder.mc.controller;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -15,7 +14,17 @@ import com.wonikrobotics.pathfinder.mc.mobilecontroller.R;
 
 import java.util.Vector;
 
+/**
+ * SteerTypeJoystick
+ *
+ * @author      Doryeong Park
+ * @date        16. 8. 2016
+ *
+ * @description SteerType joystick controller
+ */
 public class SteerTypeJoystick extends ImageView {
+
+    /* Definition of direction constants */
 
     public static final float LEFT = 1.0f;
     public static final float CENTER = 0.0f;
@@ -28,15 +37,19 @@ public class SteerTypeJoystick extends ImageView {
     private final int DEFAULT_WIDTH = 200;
     private final int DEFAULT_HEIGHT = 200;
 
-    private int color = Color.rgb(254, 196, 54);
+    /* Rectangle area with absolute coordinate */
 
     private int centerX;
     private int centerY;
 
     private Rect areaMovable;
 
+    /* Sensitivity default value */
+
     private float angularWeight = 0.75f;
     private float linearWeight = 1.0f;
+
+    /* Intermediate data */
 
     private float angle = 0.0f;
     private float angleDir = CENTER;
@@ -44,9 +57,11 @@ public class SteerTypeJoystick extends ImageView {
     private float acc = 0.0f;
     private float accDir = STOPPED;
 
+    /* Joystick listener */
+
     private JoystickListener jl;
 
-    //-- Data to be sent
+    /* Current parsed data to be published */
 
     private float dataAngular;
     private float dataLinear;
@@ -72,6 +87,11 @@ public class SteerTypeJoystick extends ImageView {
 
     }
 
+    /**
+     * setAreaMovable
+     * @param area
+     * @description Set rectangle area with absolute coordinate joystick can move
+     */
     public void setAreaMovable(Rect area) {
 
         this.areaMovable = area;
@@ -95,13 +115,6 @@ public class SteerTypeJoystick extends ImageView {
 
     }
 
-    public void changeColor(int color) {
-
-        this.color = color;
-        invalidate();
-
-    }
-
     protected void onDraw(Canvas c) {
 
         super.onDraw(c);
@@ -111,6 +124,11 @@ public class SteerTypeJoystick extends ImageView {
 
     }
 
+    /**
+     * initSettings
+     * @param context
+     * @description Defines joystick's size & event which occurs when user moves joystick
+     */
     private void initSettings(Context context) {
 
         //Layout size setting
@@ -141,7 +159,7 @@ public class SteerTypeJoystick extends ImageView {
                         float translateX = X - centerX;
                         float translateY = Y - centerY;
 
-                        if (isInside(X, Y)) {
+                        if (isInside(X, Y)) {       //If user is moving joystick inside of area
 
                             SteerTypeJoystick.this.setTranslationX(translateX);
                             SteerTypeJoystick.this.setTranslationY(translateY);
@@ -153,21 +171,19 @@ public class SteerTypeJoystick extends ImageView {
                             angleDir = determineAngleDir(translateX);
                             accDir = determineAccDir(translateY);
 
-                            //-- Set data to be sent
-                            setData(angle, angleDir, acc, accDir);
                             parseData();
 
                             if (jl != null)
                                 jl.onMove(dataAngular, dataLinear);
 
-                        } else {
+                        } else {        //If user is moving joystick outside of area
 
                             Vector<Double> maximumPoints = returnMaximumPoint(X, Y);
 
                             float maxTranslateX = (float) (maximumPoints.elementAt(0) - centerX);
                             float maxTranslateY = (float) (maximumPoints.elementAt(1) - centerY);
 
-                            acc = Math.abs((maxTranslateY / (areaMovable.height() / 2 - DEFAULT_HEIGHT / 2))
+                            acc = Math.abs((maxTranslateY / (areaMovable.height() / 2 - SteerTypeJoystick.this.getHeight() / 2))
                                     * 100.0f);
 
                             //Calculate angle
@@ -180,8 +196,6 @@ public class SteerTypeJoystick extends ImageView {
                             SteerTypeJoystick.this.setTranslationX(maxTranslateX);
                             SteerTypeJoystick.this.setTranslationY(maxTranslateY);
 
-                            //-- Set data to be sent
-                            setData(angle, angleDir, acc, accDir);
                             parseData();
 
                             if (jl != null)
@@ -202,7 +216,6 @@ public class SteerTypeJoystick extends ImageView {
                         accDir = STOPPED;
                         acc = 0.0f;
 
-                        setData(angle, angleDir, acc, accDir);
                         parseData();
 
                         if (jl != null)
@@ -222,6 +235,13 @@ public class SteerTypeJoystick extends ImageView {
 
     }
 
+    /**
+     * calculateAngle
+     * @param pX Coordinate x of event
+     * @param pY Coordinate y of event
+     * @description From axis X of center to coordinate of event, calculate absolute angle(0 ~ 360)
+     * @return Angle value(degree: 0 ~ 360)
+     */
     private float calculateAngle(int pX, int pY) {
 
         int dx, dy;
@@ -249,6 +269,14 @@ public class SteerTypeJoystick extends ImageView {
 
     }
 
+    /**
+     * parseAngle
+     * @param translateX Coordinate x of event
+     * @param translateY Coordinate y of event
+     * @param angle Angle value(degree: 0 ~ 360)
+     * @description Parse absolute angle to rotation angle (degree: 0 ~ 90)
+     * @return Rotation angle (degree: 0 ~ 90)
+     */
     private float parseAngle(float translateX, float translateY, float angle) {
 
         if (translateY < 0 && translateX < 0)
@@ -270,6 +298,11 @@ public class SteerTypeJoystick extends ImageView {
 
     }
 
+    /**
+     * determineAccDir
+     * @param translateY Coordinate y of event
+     * @return Defined constant of direction
+     */
     private float determineAccDir(float translateY) {
 
         //Update information of Y
@@ -284,9 +317,13 @@ public class SteerTypeJoystick extends ImageView {
 
     }
 
+    /**
+     * determineAngleDir
+     * @param translateX Coordinate x of event
+     * @return Defined constant of direction
+     */
     private float determineAngleDir(float translateX) {
 
-        //Update information of X
         if (translateX < 0)
             return LEFT;
 
@@ -298,6 +335,13 @@ public class SteerTypeJoystick extends ImageView {
 
     }
 
+    /**
+     * isInside
+     * @param pX Coordinate x of event
+     * @param pY Coordinate y of event
+     * @desrpition Determines whether current point is inside of area or not then calculate speed
+     * @return Whether current point is inside of area or not
+     */
     private boolean isInside(int pX, int pY) {
 
         double dx = pX - centerX;
@@ -305,9 +349,10 @@ public class SteerTypeJoystick extends ImageView {
 
         double distance = Math.sqrt(Math.pow(dx, 2.0d) + Math.pow(dy, 2.0d));
 
-        if (distance < areaMovable.height() / 2 - DEFAULT_HEIGHT / 2) {
+        if (distance < areaMovable.height() / 2 - this.getHeight() / 2) {
 
-            acc = (float) Math.abs(centerY - pY) / (areaMovable.height() / 2) * 100.0f;
+            acc = (float) Math.abs(centerY - pY) /
+                    (areaMovable.height() / 2 - this.getHeight() / 2) * 100.0f;
             return true;
 
         } else {
@@ -318,6 +363,13 @@ public class SteerTypeJoystick extends ImageView {
 
     }
 
+    /**
+     * ReturnMaximumPoint
+     * @param x Coordinate x of event
+     * @param y Coordinate y of event
+     * @description Returns maximum point for current point in circle area joystick can move
+     * @return Maximum coordinate x, y
+     */
     private Vector<Double> returnMaximumPoint(int x, int y) {
 
         Vector<Double> result = new Vector<Double>();
@@ -326,7 +378,7 @@ public class SteerTypeJoystick extends ImageView {
         double dy = y - centerY;
 
         double radian = Math.atan2(dy, dx);
-        double radius = (areaMovable.height() / 2 - DEFAULT_HEIGHT / 2);
+        double radius = (areaMovable.height() / 2 - this.getHeight() / 2);
 
         result.add(centerX + Math.cos(radian) * radius);
         result.add(centerY + Math.sin(radian) * radius);
@@ -335,24 +387,17 @@ public class SteerTypeJoystick extends ImageView {
 
     }
 
+    /**
+     * parseData
+     * @description Parse data from 4 values of angular speed, angular direction, linear speed, linear direction
+     *              to 2 values of angular velocity, linear velocity applying sensitivity for ROS master
+     */
     private void parseData() {
 
         float parsedDir = angleDir * accDir;
 
         dataAngular = (angle / 90.0f) * parsedDir * angularWeight;
         dataLinear = (acc / 100.0f) * accDir * linearWeight;
-
-    }
-
-    public void setData(float vX, float dir0, float vY, float dir1) {
-
-        this.angle = vX;
-        this.angleDir = dir0;
-
-        this.acc = vY;
-        this.accDir = dir1;
-
-        parseData();
 
     }
 
@@ -378,6 +423,9 @@ public class SteerTypeJoystick extends ImageView {
 
     }
 
+    /**
+     * Listener for data variables to be published
+     */
     public interface JoystickListener {
 
         void onMove(float dataAngular, float dataLinear);

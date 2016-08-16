@@ -10,7 +10,12 @@ import android.widget.EditText;
 import android.widget.Switch;
 
 /**
- * Created by Notebook on 2016-08-01.
+ * AddRobotDialog
+ *
+ * @author Weonwoo Joo
+ * @date 1. 8. 2016
+ *
+ * @desription Dialog for registering new robot
  */
 public class AddRobotDialog extends Activity implements View.OnClickListener {
     private Button register, cancel;
@@ -56,7 +61,7 @@ public class AddRobotDialog extends Activity implements View.OnClickListener {
                 break;
             case R.id.btn_register_cancel:
 
-                // on cancle. setResult(-1) make callback doesn't work
+                // on cancel. setResult(-1) make callback doesn't work
 
                 setResult(-1);
                 finish();

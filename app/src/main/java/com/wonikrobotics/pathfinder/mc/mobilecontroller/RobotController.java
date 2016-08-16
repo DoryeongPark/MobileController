@@ -57,25 +57,38 @@ import org.ros.node.topic.Publisher;
 import geometry_msgs.Twist;
 
 /**
- * Created by Notebook on 2016-07-28.
+ * RobotController
+ * @author          Weonwoo Joo, Doryeong Park
+ * @date            28. 7. 2016
+ *
+ * @description     Main layout to control robot with various mode & shows visualized robot data views
  */
 public class RobotController extends CustomRosActivity {
-    /**
-     * define layout display mode
-     **/
-    static final int CONTROLLER_VERTICAL_RTHETA = 1;
-    static final int CONTROLLER_VERTICAL_YTHETA = 2;
+
+    /*
+     * Definitions of control mode
+     * 1: JogController, 2: Jog, 3: Steer & Wheel, 4: DoubleLever
+     */
+    static final int CONTROLLER_VERTICAL_JOG = 1;
+    static final int CONTROLLER_VERTICAL_JOYSTICK = 2;
     static final int CONTROLLER_HORIZONTAL_STEER = 3;
     static final int CONTROLLER_HORIZONTAL_DOUBLELEVER = 4;
+
+    //HeartBeat timer
     private static ConnectionTimer cTimer = null;
-    /**
-     * define layout and views for scroll the sensor views
-     **/
+
+    /*
+     * Components associated with sensor view controlling
+     */
     private HorizontalScrollView horizontalScroll;
     private LinearLayout innerScroll;
-    /**
-     * define controller views
-     **/
+    private ImageView horizontalLeftArrow;
+    private ImageView horizontalRightArrow;
+    private LinearLayout viewContents;
+
+    /*
+     * Components associated with controlling
+     */
     private LinearLayout velocityDisplayLayout;
     private LinearLayout joystickLayout;
     private LinearLayout leftCtrLayout, rightCtrLayout;
@@ -84,17 +97,19 @@ public class RobotController extends CustomRosActivity {
     private SteerTypeJoystick steerTypeJoystick;
     private int currentSelectedController;
     private float velSensitive, angSensitive;
-    /**
-     * define views for display sensor data
-     **/
+
+    /*
+     *  Components & variables associated with sensor data
+     */
     private float[] sonarValues;
     private int[] sonarMinAngle, sonarDrawAngle;
     private SonarSensorView sonarView;
     private CameraView cameraView;
     private LaserSensorView laserView;
-    /**
-     * listeners
-     **/
+
+    /*
+     * Listeners for sensor view
+     */
     View.OnClickListener zoom = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -114,17 +129,16 @@ public class RobotController extends CustomRosActivity {
             }
         }
     };
+
     private ImageView connectionState;
-    private ImageView horizontalLeftArrow;
-    private ImageView horizontalRightArrow;
-    private LinearLayout viewContents;
+
     /**
-     * operated value for publish
+     * Operated value for publish
      **/
     private float velocity;
     private float angular;
     /**
-     * base app views
+     * Base app views
      **/
     private TextView robotNameTxt;
     private ImageView userOption;
@@ -220,28 +234,34 @@ public class RobotController extends CustomRosActivity {
      *  Handler
      *
      *  Handler makes threads without main UI thread can change UI.
-     *  If that threads are try to change UI without handler, thread rejected
-     *  to change UI from main thread.
+     *  If that threads are trying to change UI without handler, routine of thread will be rejected.
+     *  Changing UI must be executed through Handler.
+     *
+     *  Definition of message type(what)
+     *  -1: Connection, 1: Handling Data from ROS master
      **/
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
-                // ui change associated with connection
-                case -1:                    //state change
+                 /*
+                    UI change associated with subscriber data
+                    0 - connected successful, 1 - connection error
+                 */
+                case -1:
                     switch (msg.arg1) {
                         case 0:             //on connected node start
                             connectionState.setImageResource(R.drawable.connected);
                             setStateConnect(STATE_CONNECTED);
                             break;
-                        case 1:             //on error occured
+                        case 1:             //on error occurs
                             connectionState.setImageResource(R.drawable.disconnecting);
                             setStateConnect(STATE_UNREGISTERING);
                             this.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
                                     try {
-                                        Log.e("disconnted", "on error");
+                                        Log.e("disconnected", "on error");
                                         connectionState.setImageResource(R.drawable.disconnected);
                                         setStateConnect(STATE_DISCONNECTED);
                                         AlertDialog.Builder builder = new AlertDialog.Builder(RobotController.this);
@@ -264,7 +284,7 @@ public class RobotController extends CustomRosActivity {
                     }
                     break;
                 /*
-                    ui change associated with subscriber data
+                    UI change associated with subscriber data
                     0 - camera, 1 - sonar, 2 - laser,
                  */
                 case 1:
@@ -298,7 +318,7 @@ public class RobotController extends CustomRosActivity {
         Log.e("ONRESUME START", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
 
         /*
-        initiate values for sonar
+         *  Initiate values for sonar
          */
         initData();
         Intent instance = getIntent();
@@ -306,19 +326,20 @@ public class RobotController extends CustomRosActivity {
             robotNameStr = instance.getStringExtra("NAME");
         if (instance.hasExtra("IDX"))
             idx = instance.getIntExtra("IDX", -1);
+
         /*
-        get options from database
+         *  Get options from database
          */
         getUserOption(getIntent().getIntExtra("IDX", -1));
 
         /*
-        set layout contents
+         *  Set current layout contents
          */
         setLayout(currentSelectedController);
 
         /*
-         make connection with ros master
-         if master node is made in android , uri will make automatically
+         *  Make connection with ros master
+         *  If master node is made in android , uri will make automatically
          */
         if (!resumeDialog) {
             if (instance.hasExtra("URL") && instance.hasExtra("MASTER")) {
@@ -355,7 +376,7 @@ public class RobotController extends CustomRosActivity {
     }
 
     /*
-    If this heartbeat timer is over, notice to user and finish this activity
+     *  If this heartbeat timer is finished, notice to user and finish this activity
      */
     private void onTimerFinished(){
         handler.post(new Runnable() {
@@ -384,7 +405,7 @@ public class RobotController extends CustomRosActivity {
     }
 
     /*
-    Values for SonarSensorView
+     * Init values for SonarSensorView
      */
     private void initData() {
         sonarValues = new float[8];
@@ -393,14 +414,14 @@ public class RobotController extends CustomRosActivity {
         for (int i = 0; i < 8; ++i) {
             sonarValues[i] = 0.0f;
             sonarMinAngle[i] = 194 + 19 * i;
-//            sonarMinAngle[i] = 14 + 19 * i;
+            sonarMinAngle[i] = 14 + 19 * i;
             sonarDrawAngle[i] = 19;
         }
     }
 
 
     /*
-    sensor view controll arrow click listener
+     * Init Sensor view control arrow click listener
      */
     private void addEventForHorrizontalArrows() {
         horizontalLeftArrow.setOnClickListener(new View.OnClickListener() {
@@ -434,7 +455,7 @@ public class RobotController extends CustomRosActivity {
     }
 
     /**
-     * method for initiate views
+     * Method for initiating views
      *
      * @param flag
      */
@@ -449,7 +470,7 @@ public class RobotController extends CustomRosActivity {
         cameraView = new CameraView(this);
 
         /*
-        set orientation
+         *  Set layout orientation
          */
         if (flag == CONTROLLER_HORIZONTAL_DOUBLELEVER || flag == CONTROLLER_HORIZONTAL_STEER) {
             Log.e("BEFORE CHANGE", "PAUSE_STATE : " + Integer.toString(getPAUSE_STATE()) + ", dialog : " + Boolean.valueOf(resumeDialog));
@@ -526,7 +547,7 @@ public class RobotController extends CustomRosActivity {
         velocityDisplayLayout.addView(velocityDisplayer);
         /*********************************************   Container 뷰   ********************************************************/
         innerScroll = new LinearLayout(context);
-        if (flag == CONTROLLER_VERTICAL_RTHETA || flag == CONTROLLER_VERTICAL_YTHETA)
+        if (flag == CONTROLLER_VERTICAL_JOG || flag == CONTROLLER_VERTICAL_JOYSTICK)
             innerScroll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
         else
             innerScroll.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -632,8 +653,8 @@ public class RobotController extends CustomRosActivity {
         setPAUSE_STATE(PAUSE_WITHOUT_STOP);
         initViews(flag);
         switch (flag) {
-            case RobotController.CONTROLLER_VERTICAL_RTHETA:
-            case RobotController.CONTROLLER_VERTICAL_YTHETA:
+            case RobotController.CONTROLLER_VERTICAL_JOG:
+            case RobotController.CONTROLLER_VERTICAL_JOYSTICK:
                 horizontalScroll.post(new Runnable() {
                     @Override
                     public void run() {
@@ -660,7 +681,7 @@ public class RobotController extends CustomRosActivity {
                         }
 
 
-                        if (flag == RobotController.CONTROLLER_VERTICAL_RTHETA) {
+                        if (flag == RobotController.CONTROLLER_VERTICAL_JOG) {
 
                             // Jog Controller
                             jogJoystick = new JogJoystick(RobotController.this);
@@ -852,16 +873,16 @@ public class RobotController extends CustomRosActivity {
         nodeConfiguration.setMasterUri(getMasterUri());
 
 
-        // create node
+        //Create node
         AndroidNode androidNode = new AndroidNode("robotics") {
             @Override
             public void onError(Node node, Throwable throwable) {
                 super.onError(node, throwable);
-                Log.d("NodeExecutor", "onerror");
+                Log.d("NodeExecutor", "onError");
                 android.os.Message msg = new android.os.Message();
                 msg.what = -1;
                 msg.arg1 = 1;
-                msg.obj = "Error Occured";
+                msg.obj = "Error occur";
                 handler.sendMessage(msg);
                 try {
                     node.shutdown();
@@ -880,7 +901,7 @@ public class RobotController extends CustomRosActivity {
             }
         };
 
-        // command publisher
+        //Definition of robot control publisher
         CustomPublisher velocityPublisher = new CustomPublisher("cmd_vel",
 //        CustomPublisher velocityPublisher = new CustomPublisher("mobile_base/commands/velocity",
                 geometry_msgs.Twist._TYPE, 100) {
@@ -908,7 +929,7 @@ public class RobotController extends CustomRosActivity {
         androidNode.addPublisher(velocityPublisher);
 
 
-        // sonar subscribers
+        //Definition of sonar subscribers
         for (int i = 1; i < 9; ++i) {
             final int in = i;
             CustomSubscriber sonarSubscriber = new CustomSubscriber("p1_sonar_" + String.valueOf(i),
@@ -926,7 +947,7 @@ public class RobotController extends CustomRosActivity {
             androidNode.addSubscriber(sonarSubscriber);
         }
 
-        // laser subcriber
+        //Definition of subscribers
         CustomSubscriber laserSubscriber = new CustomSubscriber("scan", sensor_msgs.LaserScan._TYPE) {
             @Override
             public void subscribingRoutine(Message message) {
@@ -940,7 +961,7 @@ public class RobotController extends CustomRosActivity {
         };
         androidNode.addSubscriber(laserSubscriber);
 
-        // camera subscriber
+        //Definition of Camera subscriber
         CustomSubscriber cameraSubscriber = new CustomSubscriber("image/compressed", sensor_msgs.CompressedImage._TYPE) {
             //        CustomSubscriber cameraSubscriber = new CustomSubscriber("camera/rgb/image_raw/compressed", sensor_msgs.CompressedImage._TYPE) {
             @Override
@@ -957,7 +978,7 @@ public class RobotController extends CustomRosActivity {
         androidNode.addSubscriber(cameraSubscriber);
 
 
-        // heartbeat subscriber
+        //Definition of Heartbeat subscriber
         CustomSubscriber timerSubscriber = new CustomSubscriber("clock", rosgraph_msgs.Clock._TYPE){
             @Override
             public void subscribingRoutine(Message message) {
@@ -968,11 +989,10 @@ public class RobotController extends CustomRosActivity {
 
         androidNode.addSubscriber(timerSubscriber);
 
-        // node start
+        // Node start
         nodeMainExecutor.execute(androidNode, nodeConfiguration);
 
-
-        // start heartbeat
+        // Start heartbeat
         if (!getIs_Master()) {
             if (cTimer == null) {
                 cTimer = new ConnectionTimer(10) {

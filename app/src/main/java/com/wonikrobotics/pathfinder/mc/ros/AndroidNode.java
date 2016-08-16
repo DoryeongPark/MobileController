@@ -9,7 +9,12 @@ import org.ros.node.NodeMain;
 import java.util.Vector;
 
 /**
- * Created by Felix on 2016-07-29.
+ *  AndroidNode
+ *
+ *  @author         Doryeong Park
+ *  @date           29. 7. 2016
+ *
+ *  @description    Abstract class to provide ROS node interface
  */
 public class AndroidNode extends AbstractNodeMain implements NodeMain {
 
@@ -17,11 +22,12 @@ public class AndroidNode extends AbstractNodeMain implements NodeMain {
     private Vector<CustomSubscriber> subscribers;
     private GraphName nodeName;
 
-    public AndroidNode(String nodename) {
+    public AndroidNode(String nodeName) {
 
         publishers = new Vector<CustomPublisher>();
         subscribers = new Vector<CustomSubscriber>();
-        nodeName = GraphName.of(nodename);
+        this.nodeName = GraphName.of(nodeName);
+
     }
 
     @Override
@@ -29,6 +35,11 @@ public class AndroidNode extends AbstractNodeMain implements NodeMain {
         return nodeName;
     }
 
+    /**
+     * onStart
+     * @param connectedNode
+     * @description Executes all publishers & subscribers in storage
+     */
     @Override
     public void onStart(final ConnectedNode connectedNode) {
 
@@ -40,27 +51,53 @@ public class AndroidNode extends AbstractNodeMain implements NodeMain {
 
     }
 
+    /**
+     * onShutDown
+     * @param node
+     * @description Method executed during node shutdown process
+     */
     @Override
     public void onShutdown(Node node) {
 
     }
 
+    /**
+     * onShutdownComplete
+     * @param node
+     * @description Method executed when shutdown process is finished
+     */
     @Override
     public void onShutdownComplete(Node node) {
 
     }
 
+    /**
+     * onError
+     * @param node
+     * @param throwable
+     * @description Method executed when it's not able to connect with ROS master
+     */
     @Override
     public void onError(Node node, Throwable throwable) {
 
     }
 
+    /**
+     * addPublisher
+     * @param ps
+     * @decription Store publisher to be executed
+     */
     public void addPublisher(CustomPublisher ps) {
 
         publishers.add(ps);
 
     }
 
+    /**
+     * addSubscriber
+     * @param ss
+     * @description Store subscriber to be executed
+     */
     public void addSubscriber(CustomSubscriber ss) {
 
         subscribers.add(ss);

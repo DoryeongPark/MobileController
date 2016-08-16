@@ -10,7 +10,12 @@ import android.graphics.Shader;
 import android.view.View;
 
 /**
- * Created by Notebook on 2016-07-13.
+ * VelocityDisplay
+ *
+ * @author      Weonwoo Joo
+ * @date        13. 7. 2016
+ *
+ * @description View displaying linear velocity
  */
 public class VelocityDisplay extends View {
     int vel = 100;

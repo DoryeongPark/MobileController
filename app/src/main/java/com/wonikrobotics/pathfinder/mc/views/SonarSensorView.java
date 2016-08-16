@@ -9,7 +9,12 @@ import android.util.AttributeSet;
 import android.view.View;
 
 /**
- * Created by Felix on 2016-08-03.
+ * SonarSensorView
+ *
+ * @author      Weonwoo Joo
+ * @date        1. 8. 2016
+ *
+ * @description View visualizing sonar sensor data
  */
 public class SonarSensorView extends View {
     public static final int AROUND_ROBOT = 1;

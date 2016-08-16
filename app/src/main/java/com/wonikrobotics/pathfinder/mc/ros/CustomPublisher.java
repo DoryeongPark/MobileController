@@ -6,7 +6,12 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.PublisherListener;
 
 /**
- * Created by Felix on 2016-07-29.
+ * CustomPublisher
+ *
+ * @author      Doryeong Park
+ * @date        29. 7. 2016
+ *
+ * @description Custom publisher interface
  */
 public abstract class CustomPublisher {
 
@@ -23,14 +28,31 @@ public abstract class CustomPublisher {
 
     }
 
+    /**
+     * publishingRoutine
+     * @param publisher
+     * @param connectedNode
+     * @description User needs to define routine of publishing data here
+     */
     public abstract void publishingRoutine(Publisher publisher, ConnectedNode connectedNode);
 
+    /**
+     * onLoopClear
+     * @param publisher
+     * @param connectedNode
+     * @description User needs to define routine to be executed when publisher loop is finished
+     */
     public abstract void onLoopClear(Publisher publisher, ConnectedNode connectedNode);
 
+
+    /**
+     * onStart
+     * @param connectedNode
+     * @description Create publisher and start publishing routine
+     */
     public void onStart(final ConnectedNode connectedNode) {
 
-        publisher =
-                connectedNode.newPublisher(topicName, sensorType);
+        publisher = connectedNode.newPublisher(topicName, sensorType);
 
         publisher.addListener(new PublisherListener() {
             @Override
@@ -77,6 +99,7 @@ public abstract class CustomPublisher {
 
         });
 
+        //Execute publishing routine within loop as thread
         CustomCancellableLoop loop = new CustomCancellableLoop() {
 
             protected void loop() throws InterruptedException {
@@ -111,24 +134,18 @@ public abstract class CustomPublisher {
 
     }
 
-    //Functions for overriding
+    //Functions user can override
 
-    public void onNewSubscriber(Publisher publisher, SubscriberIdentifier subscriberIdentifier) {
-    }
+    public void onNewSubscriber(Publisher publisher, SubscriberIdentifier subscriberIdentifier) {}
 
-    public void onShutdown(Publisher publisher) {
-    }
+    public void onShutdown(Publisher publisher) {}
 
-    public void onMasterRegistrationSuccess(Object o) {
-    }
+    public void onMasterRegistrationSuccess(Object o) {}
 
-    public void onMasterRegistrationFailure(Object o) {
-    }
+    public void onMasterRegistrationFailure(Object o) {}
 
-    public void onMasterUnregistrationSuccess(Object o) {
-    }
+    public void onMasterUnregistrationSuccess(Object o) {}
 
-    public void onMasterUnregistrationFailure(Object o) {
-    }
+    public void onMasterUnregistrationFailure(Object o) {}
 
 }

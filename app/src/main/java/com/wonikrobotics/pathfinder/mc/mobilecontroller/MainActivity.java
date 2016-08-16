@@ -10,6 +10,13 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+/**
+ * MainActivity
+ *
+ * @author Weonwoo Joo
+ *
+ * @description Loading layout of application
+ */
 public class MainActivity extends Activity {
     ImageView logo, robotics;
     LinearLayout loading;

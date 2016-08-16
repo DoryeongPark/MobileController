@@ -23,7 +23,12 @@ import java.net.URISyntaxException;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Created by Notebook on 2016-08-01.
+ * CustomRosActivity
+ *
+ * @author      Weonwoo Joo
+ * @date        1. 8. 2016
+ *
+ * @description Activity communicate with ROS master
  */
 public abstract class CustomRosActivity extends Activity {
 

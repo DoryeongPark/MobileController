@@ -6,7 +6,12 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Subscriber;
 
 /**
- * Created by Felix on 2016-07-29.
+ * CustomSubscriber
+ *
+ * @author      Doryeong Park
+ * @date        29. 7. 2016
+ *
+ * @description Custom subscriber interface
  */
 public abstract class CustomSubscriber {
 
@@ -21,8 +26,18 @@ public abstract class CustomSubscriber {
 
     }
 
+    /**
+     * subscribingRoutine
+     * @param message
+     * @description User needs to define routine of subscribing data here
+     */
     public abstract void subscribingRoutine(Message message);
 
+    /**
+     * onStart
+     * @param connectedNode
+     * @description Create subscriber and start subscribing routine
+     */
     public void onStart(ConnectedNode connectedNode) {
 
         subscriber = connectedNode.newSubscriber(topicName, sensorType);

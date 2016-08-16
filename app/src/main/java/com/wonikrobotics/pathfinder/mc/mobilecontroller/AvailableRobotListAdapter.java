@@ -11,7 +11,12 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 /**
- * Created by Notebook on 2016-07-27.
+ * AvailableRobotListAdapter
+ *
+ * @author Weonwoo Joo
+ * @date 27. 7. 2016
+ *
+ * @description Adapter for robot ListView
  */
 public class AvailableRobotListAdapter extends BaseAdapter {
     private Context mContext;

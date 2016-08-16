@@ -17,7 +17,12 @@ import com.wonikrobotics.pathfinder.mc.mobilecontroller.database.DataBases;
 import com.wonikrobotics.pathfinder.mc.mobilecontroller.database.DbOpenHelper;
 
 /**
- * Created by Notebook on 2016-08-01.
+ * UserOptionDialog
+ *
+ * @author      Weonwoo Joo
+ * @date        1. 8. 2016
+ *
+ * @description Dialog for enabling users to change control mode & apply user sensitivity
  */
 public class UserOptionDialog extends Activity {
 
@@ -60,10 +65,10 @@ public class UserOptionDialog extends Activity {
                     ctrSelected = RobotController.CONTROLLER_HORIZONTAL_DOUBLELEVER;
                     break;
                 case R.id.useropt_ctr_joystick1: // 1   - Jog Controller
-                    ctrSelected = RobotController.CONTROLLER_VERTICAL_RTHETA;
+                    ctrSelected = RobotController.CONTROLLER_VERTICAL_JOG;
                     break;
                 case R.id.useropt_ctr_joystick2: // 2   - Joystick
-                    ctrSelected = RobotController.CONTROLLER_VERTICAL_YTHETA;
+                    ctrSelected = RobotController.CONTROLLER_VERTICAL_JOYSTICK;
                     break;
                 case R.id.useropt_ctr_leverwheel: // 3  - SteeringWheel
                     ctrSelected = RobotController.CONTROLLER_HORIZONTAL_STEER;
@@ -214,11 +219,11 @@ public class UserOptionDialog extends Activity {
                 leverwheel.setBackground(getResources().getDrawable(R.drawable.leftbottomviolet));
                 leverwheel.setTextColor(Color.WHITE);
                 break;
-            case RobotController.CONTROLLER_VERTICAL_RTHETA:
+            case RobotController.CONTROLLER_VERTICAL_JOG:
                 rtheta.setBackground(getResources().getDrawable(R.drawable.righttopviolet));
                 rtheta.setTextColor(Color.WHITE);
                 break;
-            case RobotController.CONTROLLER_VERTICAL_YTHETA:
+            case RobotController.CONTROLLER_VERTICAL_JOYSTICK:
                 ytheta.setBackground(getResources().getDrawable(R.drawable.rightbottomviolet));
                 ytheta.setTextColor(Color.WHITE);
                 break;

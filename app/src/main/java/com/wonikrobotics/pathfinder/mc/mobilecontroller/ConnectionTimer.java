@@ -1,10 +1,12 @@
 package com.wonikrobotics.pathfinder.mc.mobilecontroller;
 
 /**
- * Created by Felix on 2016-08-09.
+ * ConnectionTimer
  *
- * Heartbeat time out thread class
- * onTimerFinished method will executed when timer is over
+ * @author Doryeong Park, Weonwoo Joo
+ * @date 9. 8. 2016
+ *
+ * @description Thread for connection timeout heartbeat with system clock
  */
 public abstract class ConnectionTimer extends Thread {
     private int maxPermissionTime = 10;
@@ -25,7 +27,7 @@ public abstract class ConnectionTimer extends Thread {
         while(stateShutDown == false){
             //현재 시간과 timer에 저장된 시간을 비교해 시간제한과 비교
             long current = System.currentTimeMillis();
-            if (current - timer >= maxPermissionTime * 1000) { // 단위는 milisecond
+            if (current - timer >= maxPermissionTime * 1000) { // 단위는 millisecond
                 onTimerFinished();
                 shutDown();
             } else {
@@ -45,12 +47,13 @@ public abstract class ConnectionTimer extends Thread {
 
 
     public void shutDown(){
-        // loop 종료
+
         stateShutDown = true;
 
     }
+
     public void getHeartBeat() {
-        //현재 시간 갱신
+
         timer = System.currentTimeMillis();
 
     }

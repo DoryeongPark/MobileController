@@ -22,7 +22,12 @@ import java.util.ArrayList;
 
 
 /**
- * Created by Notebook on 2016-07-26.
+ * SelectRobot
+ *
+ * @author      Weonwoo Joo
+ * @date        26. 7. 2016
+ *
+ * @description Layout for managing robots registered
  */
 public class SelectRobot extends Activity {
     private ListView availableRobotList;

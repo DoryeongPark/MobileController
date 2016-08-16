@@ -13,10 +13,10 @@ import android.widget.Switch;
  * Created by Notebook on 2016-08-01.
  */
 public class AddRobotDialog extends Activity implements View.OnClickListener {
-    Button register, cancel;
-    EditText name, uri;
-    Switch master;
-    String master_checked = "false";
+    private Button register, cancel;
+    private EditText name, uri;
+    private Switch master;
+    private String master_checked = "false";
 
     @Override
     protected void onCreate(Bundle savedInstance) {
@@ -27,6 +27,9 @@ public class AddRobotDialog extends Activity implements View.OnClickListener {
         name = (EditText) findViewById(R.id.register_robotname);
         uri = (EditText) findViewById(R.id.register_roboturi);
         master = (Switch) findViewById(R.id.master_switch);
+
+        // master switch change listener
+
         master.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -41,6 +44,9 @@ public class AddRobotDialog extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_register_register:
+
+                // on click add button
+
                 Intent data = new Intent();
                 data.putExtra("name", name.getText().toString());
                 data.putExtra("uri", uri.getText().toString());
@@ -49,6 +55,9 @@ public class AddRobotDialog extends Activity implements View.OnClickListener {
                 finish();
                 break;
             case R.id.btn_register_cancel:
+
+                // on cancle. setResult(-1) make callback doesn't work
+
                 setResult(-1);
                 finish();
                 break;

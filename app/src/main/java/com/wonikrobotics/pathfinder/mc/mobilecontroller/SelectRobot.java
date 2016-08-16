@@ -31,6 +31,7 @@ public class SelectRobot extends Activity {
     private AvailableRobotListAdapter robotListAdapter;
     private TextView btnConnect, robotName, robotURL, robotInfo;
     private int selectedRobotPosition = -1;
+    /// listener for get selected robot's information
     ListView.OnItemClickListener robotListListener = new ListView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -42,15 +43,22 @@ public class SelectRobot extends Activity {
         }
     };
     private ImageView addRobot, delRobot, modRobot;
+    /// listener for addRobot,deleteRobot,modifyRobot
     private View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.select_robot_add:
+
+                    // start AddRobotDialog activity to get user input about robot name,uri
+
                     Intent addRobotActivity = new Intent(SelectRobot.this, AddRobotDialog.class);
                     startActivityForResult(addRobotActivity, 1);
                     break;
                 case R.id.btnConnect:
+
+                    // start RobotController activity to control selected robot. If no robot is selected, make toast message
+
                     if (selectedRobotPosition != -1 && robotList.get(selectedRobotPosition).getIdx() != -1) {
                         RobotInformation selected = robotList.get(selectedRobotPosition);
                         Intent controlActivity = new Intent(SelectRobot.this, RobotController.class);
@@ -64,6 +72,9 @@ public class SelectRobot extends Activity {
                     }
                     break;
                 case R.id.select_robot_del:
+
+                    // Create alertdialog to make sure about delete robot from DB
+
                     if (selectedRobotPosition != -1) {
                         AlertDialog.Builder build = new AlertDialog.Builder(SelectRobot.this);
                         build.setTitle(robotList.get(selectedRobotPosition).getRobotName());
@@ -93,6 +104,9 @@ public class SelectRobot extends Activity {
                     }
                     break;
                 case R.id.select_robot_mod:
+
+                    // start RobotModifyDialog to get new informaion about robot from user
+
                     if (selectedRobotPosition != -1) {
                         Intent robotModifyDialog = new Intent(SelectRobot.this, RobotModifyDialog.class);
                         RobotInformation info = robotList.get(selectedRobotPosition);
@@ -133,10 +147,20 @@ public class SelectRobot extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        // load robot list
+
         robotListDataLoad();
         availableRobotList.setSelection(selectedRobotPosition);
     }
 
+
+    /*
+    *
+    * Get robot list from DB
+    * lists are storaged on  robotList  as instance of RobotInformation class
+    *
+     */
     private void robotListDataLoad() {
         if (robotList == null) {
             robotList = new ArrayList<RobotInformation>();
@@ -176,6 +200,9 @@ public class SelectRobot extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (resultCode == 1) {
+
+            // callback on finish of AddRobotDialog. Insert values into DB
+
             if (mDbOpenHelper == null) {
                 mDbOpenHelper = new DbOpenHelper(SelectRobot.this);
             }
@@ -184,6 +211,9 @@ public class SelectRobot extends Activity {
             Toast.makeText(SelectRobot.this, "New robot registering is success", Toast.LENGTH_SHORT).show();
             robotListDataLoad();
         } else if (resultCode == 2) {
+
+            // callback on finich of RobotModifyDialog. Update values of DB
+
             if (mDbOpenHelper == null) {
                 mDbOpenHelper = new DbOpenHelper(SelectRobot.this);
             }

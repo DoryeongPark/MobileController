@@ -33,13 +33,16 @@ public class MainActivity extends Activity {
         logo = (ImageView) findViewById(R.id.woniklogo);
         robotics = (ImageView) findViewById(R.id.robotics);
         BitmapFactory.Options option = new BitmapFactory.Options();
-        option.inSampleSize = 2;
+        option.inSampleSize = 2;    // Bitmap 사이즈 1/2로 줄임
         Bitmap rawLogo = BitmapFactory.decodeResource(getResources(), R.drawable.logo, option);
         Bitmap rawText = BitmapFactory.decodeResource(getResources(), R.drawable.robotics, option);
         logo.setImageBitmap(rawLogo);
         robotics.setImageBitmap(rawText);
+
+        // Fadein animation start
         robotics.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
         logo.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+
 
         handler = new Handler();
         handler.postDelayed(goOver, 3000);

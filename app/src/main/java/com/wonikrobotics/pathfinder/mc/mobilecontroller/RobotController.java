@@ -31,9 +31,9 @@ import android.widget.ToggleButton;
 
 import com.wonikrobotics.pathfinder.mc.controller.ControlLever;
 import com.wonikrobotics.pathfinder.mc.controller.ControlWheel;
-import com.wonikrobotics.pathfinder.mc.controller.DoubleLeverCalculator;
 import com.wonikrobotics.pathfinder.mc.controller.JogJoystick;
 import com.wonikrobotics.pathfinder.mc.controller.SteerTypeJoystick;
+import com.wonikrobotics.pathfinder.mc.controller.VelocityCalculator;
 import com.wonikrobotics.pathfinder.mc.mobilecontroller.database.DataBases;
 import com.wonikrobotics.pathfinder.mc.mobilecontroller.database.DbOpenHelper;
 import com.wonikrobotics.pathfinder.mc.ros.AndroidNode;
@@ -760,7 +760,7 @@ public class RobotController extends CustomRosActivity {
                         } else {
 
                             // Calculate velocity and angular with right,left wheel
-                            final DoubleLeverCalculator cal = new DoubleLeverCalculator() {
+                            final VelocityCalculator cal = new VelocityCalculator() {
                                 @Override
                                 public void valueChangeListener(float velocity, float angular) {
                                     RobotController.this.velocity = -1 * velocity;

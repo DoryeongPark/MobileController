@@ -116,7 +116,7 @@
                         android:orientation="horizontal"
                         android:weightSum="1">
                         <ImageView
-                            android:id="@+id/verticalLeftArrow"
+                            android:id="@+id/horizontalLeftArrow"
                             android:layout_width="0px"
                             android:layout_height="match_parent"
                             android:layout_weight="0.1"
@@ -124,14 +124,14 @@
                             android:gravity="center"
                             android:scaleType="fitCenter"
                             android:src="@drawable/leftarrow"/>
-                        <ScrollView
-                            android:id="@+id/verticalScroll"
+
+                        <HorizontalScrollView
+                            android:id="@+id/horizontalScroll"
                             android:layout_width="0px"
                             android:layout_height="match_parent"
-                            android:layout_weight="0.8">
-                        </ScrollView>
+                            android:layout_weight="0.8"></HorizontalScrollView>
                         <ImageView
-                            android:id="@+id/verticalRightArrow"
+                            android:id="@+id/horizontalRightArrow"
                             android:layout_width="0px"
                             android:layout_height="match_parent"
                             android:layout_weight="0.1"

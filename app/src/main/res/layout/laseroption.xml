@@ -1,33 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:alpha="0.6"
-    android:orientation="horizontal">
+    android:alpha="0.6">
 
-    <ToggleButton
-        android:id="@+id/laser_autoresize"
-        android:layout_width="0px"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:text="AutoResize" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:orientation="horizontal">
 
-    <Spinner
-        android:id="@+id/laser_displayrange"
-        android:layout_width="0px"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:entries="@array/laserrange">
+        <ToggleButton
+            android:id="@+id/laser_autoresize"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:text="AutoResize" />
 
-    </Spinner>
+        <Spinner
+            android:id="@+id/laser_displayrange"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:entries="@array/laserrange">
 
-    <Spinner
-        android:id="@+id/laser_displaymode"
-        android:layout_width="0px"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:entries="@array/laserdisplay">
+        </Spinner>
 
-    </Spinner>
+        <Spinner
+            android:id="@+id/laser_displaymode"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:entries="@array/laserdisplay">
 
-</LinearLayout>
+        </Spinner>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/laser_zoomin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:scaleType="centerInside"
+        android:src="@drawable/zoomin" />
+
+    <ImageView
+        android:id="@+id/laser_zoomout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:scaleType="centerInside"
+        android:src="@drawable/zoomout" />
+</RelativeLayout>

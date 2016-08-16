@@ -2,9 +2,10 @@ package com.wonikrobotics.pathfinder.mc.mobilecontroller;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -31,9 +32,17 @@ public class MainActivity extends Activity {
         loading = (LinearLayout) findViewById(R.id.loading_layout);
         logo = (ImageView) findViewById(R.id.woniklogo);
         robotics = (ImageView) findViewById(R.id.robotics);
-        robotics.setVisibility(View.VISIBLE);
+        BitmapFactory.Options option = new BitmapFactory.Options();
+        option.inSampleSize = 2;    // Bitmap 사이즈 1/2로 줄임
+        Bitmap rawLogo = BitmapFactory.decodeResource(getResources(), R.drawable.logo, option);
+        Bitmap rawText = BitmapFactory.decodeResource(getResources(), R.drawable.robotics, option);
+        logo.setImageBitmap(rawLogo);
+        robotics.setImageBitmap(rawText);
+
+        // Fadein animation start
         robotics.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
         logo.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+
 
         handler = new Handler();
         handler.postDelayed(goOver, 3000);

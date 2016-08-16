@@ -3,7 +3,9 @@ package com.wonikrobotics.pathfinder.mc.mobilecontroller;
 import android.net.Uri;
 
 /**
- * Created by Notebook on 2016-07-05.
+ * Created by Notebook on 2016-07-05
+ *
+ * Data set for robot information.
  */
 public class RobotInformation {
     private Uri masterUri;

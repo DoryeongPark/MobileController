@@ -13,11 +13,11 @@ import android.widget.Switch;
  * Created by Notebook on 2016-08-04.
  */
 public class RobotModifyDialog extends Activity implements View.OnClickListener {
-    Button register, cancel;
-    EditText name, uri;
-    Switch master;
-    String master_checked = "false";
-    int idx = -1;
+    private Button register, cancel;
+    private EditText name, uri;
+    private Switch master;
+    private String master_checked = "false";
+    private int idx = -1;
 
     @Override
     protected void onCreate(Bundle savedInstance) {
@@ -28,6 +28,9 @@ public class RobotModifyDialog extends Activity implements View.OnClickListener 
         name = (EditText) findViewById(R.id.register_robotname);
         uri = (EditText) findViewById(R.id.register_roboturi);
         master = (Switch) findViewById(R.id.master_switch);
+
+        // master switch change listener
+
         master.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -37,6 +40,9 @@ public class RobotModifyDialog extends Activity implements View.OnClickListener 
         register.setText("Modify");
         register.setOnClickListener(this);
         cancel.setOnClickListener(this);
+
+
+        // load robot information from intent
 
         Intent info = getIntent();
         idx = info.getIntExtra("ROBOTIDX", -1);
@@ -49,6 +55,9 @@ public class RobotModifyDialog extends Activity implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_register_register:
+
+                // on click add button
+
                 Intent data = new Intent();
                 data.putExtra("idx", idx);
                 data.putExtra("name", name.getText().toString());
@@ -58,6 +67,9 @@ public class RobotModifyDialog extends Activity implements View.OnClickListener 
                 finish();
                 break;
             case R.id.btn_register_cancel:
+
+                // on cancel. setResult(-1) makes callback doesn't work
+
                 setResult(-1);
                 finish();
                 break;

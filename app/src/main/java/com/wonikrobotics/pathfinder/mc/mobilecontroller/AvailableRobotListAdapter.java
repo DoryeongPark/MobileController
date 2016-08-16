@@ -18,12 +18,16 @@ public class AvailableRobotListAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private ArrayList<RobotInformation> robotList;
 
+
+    // robot list have to be declared in constructor
     public AvailableRobotListAdapter(Context c, ArrayList<RobotInformation> robotList) {
         this.mContext = c;
         this.robotList = robotList;
         this.inflater = LayoutInflater.from(c);
     }
 
+
+    // return value decide number of list rows.
     @Override
     public int getCount() {
         return robotList.size();
@@ -39,12 +43,16 @@ public class AvailableRobotListAdapter extends BaseAdapter {
         return robotList.get(position);
     }
 
+
+    // Row views in ListView reused by getView method.
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.availablerobotlistitem, parent, false);
         }
         ((TextView) convertView.findViewById(R.id.availablerobotlist_robotname)).setText(robotList.get(position).getRobotName());
+
+        // listener for option button clicked
         if (robotList.get(position).getIdx() >= 0) {
             convertView.findViewById(R.id.availablerobotlist_option).setOnClickListener(new View.OnClickListener() {
 

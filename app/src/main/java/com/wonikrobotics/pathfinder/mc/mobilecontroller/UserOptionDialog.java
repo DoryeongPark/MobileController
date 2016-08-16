@@ -20,7 +20,20 @@ import com.wonikrobotics.pathfinder.mc.mobilecontroller.database.DbOpenHelper;
  * Created by Notebook on 2016-08-01.
  */
 public class UserOptionDialog extends Activity {
-    SeekBar.OnSeekBarChangeListener angChangeListener = new SeekBar.OnSeekBarChangeListener() {
+
+    private TextView dblever, leverwheel, rtheta, ytheta, angulartxt, veltxt;
+    private SeekBar angularbar, velbar;
+    private int ctrSelected = 1;
+    private float velSensitive = 1.0f, angSensitive = 1.0f;
+    private DbOpenHelper mDbOpenHelper = null;
+    private int idx = -1;                                           // robot Index of DB
+
+    /**
+     * Listeners
+     */
+
+    // angular sensitivity SeekBar listener
+    private SeekBar.OnSeekBarChangeListener angChangeListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             angSensitive = progress / 100f;
@@ -37,31 +50,31 @@ public class UserOptionDialog extends Activity {
 
         }
     };
-    private TextView dblever, leverwheel, rtheta, ytheta, angulartxt, veltxt;
-    private SeekBar angularbar, velbar;
-    private int ctrSelected = 1;
-    View.OnClickListener ctr_selector = new View.OnClickListener() {
+
+    // Controller select listener
+    private View.OnClickListener ctr_selector = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.useropt_ctr_doublelever: // 4
+                case R.id.useropt_ctr_doublelever: // 4  - Double lever
                     ctrSelected = RobotController.CONTROLLER_HORIZONTAL_DOUBLELEVER;
                     break;
-                case R.id.useropt_ctr_joystick1: // 1
+                case R.id.useropt_ctr_joystick1: // 1   - Jog Controller
                     ctrSelected = RobotController.CONTROLLER_VERTICAL_RTHETA;
                     break;
-                case R.id.useropt_ctr_joystick2: // 2
+                case R.id.useropt_ctr_joystick2: // 2   - Joystick
                     ctrSelected = RobotController.CONTROLLER_VERTICAL_YTHETA;
                     break;
-                case R.id.useropt_ctr_leverwheel: // 3
+                case R.id.useropt_ctr_leverwheel: // 3  - SteeringWheel
                     ctrSelected = RobotController.CONTROLLER_HORIZONTAL_STEER;
                     break;
             }
             ctrSelectChangeListener();
         }
     };
-    private float velSensitive = 1.0f, angSensitive = 1.0f;
-    SeekBar.OnSeekBarChangeListener velChangeListener = new SeekBar.OnSeekBarChangeListener() {
+
+    // velocity sensitivity SeekBar Listener
+    private SeekBar.OnSeekBarChangeListener velChangeListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             velSensitive = progress / 100f;
@@ -78,8 +91,7 @@ public class UserOptionDialog extends Activity {
 
         }
     };
-    private DbOpenHelper mDbOpenHelper = null;
-    private int idx = -1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +112,8 @@ public class UserOptionDialog extends Activity {
         velbar.setOnSeekBarChangeListener(velChangeListener);
         angularbar.setOnSeekBarChangeListener(angChangeListener);
         final BitmapDrawable thumb = (BitmapDrawable) getResources().getDrawable(R.drawable.ctr_thumb);
+
+        // make SeekBar Thumb small
         ViewTreeObserver vto = velbar.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
@@ -113,6 +127,7 @@ public class UserOptionDialog extends Activity {
                 return true;
             }
         });
+        // make SeekBar Thumb small
         vto = angularbar.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
@@ -131,6 +146,10 @@ public class UserOptionDialog extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        /**
+         *  load option data from DB
+         */
         if (mDbOpenHelper == null) {
             mDbOpenHelper = new DbOpenHelper(UserOptionDialog.this);
         }
@@ -140,7 +159,6 @@ public class UserOptionDialog extends Activity {
         Cursor c = mDbOpenHelper.getAllColumns();
         if (c.getCount() != 0) {
             idx = getIntent().getIntExtra("IDX", -1);
-            Log.e("dialog", Integer.toString(idx));
             if (idx != -1) {
                 while (c.moveToNext() && c.getInt(c.getColumnIndex(DataBases.CreateDB.IDX)) != idx) {
                 }
@@ -175,6 +193,9 @@ public class UserOptionDialog extends Activity {
         mDbOpenHelper = null;
     }
 
+    /**
+     * change background of selected option
+     */
     private void ctrSelectChangeListener() {
         dblever.setBackground(getResources().getDrawable(R.drawable.lefttopwhite));
         dblever.setTextColor(Color.BLACK);
@@ -204,6 +225,7 @@ public class UserOptionDialog extends Activity {
         }
     }
 
+    // update DataBase on finish
     @Override
     protected void onPause() {
         if (mDbOpenHelper == null) {

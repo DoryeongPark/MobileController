@@ -179,6 +179,7 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
         } catch (Exception e) {
             throw new RosRuntimeException(e);
         }
+
         masterUri = rosCore.getUri();
     }
 

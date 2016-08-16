@@ -34,10 +34,26 @@ public class DbOpenHelper {
         mDB.close();
     }
 
+    /**
+     * Return all rows
+     *
+     * @return
+     */
     public Cursor getAllColumns() {
         return mDB.query(DataBases.CreateDB._TABLENAME, null, null, null, null, null, null);
     }
 
+    /**
+     * Insert new row to Database
+     *
+     * @param name
+     * @param uri
+     * @param master
+     * @param controller
+     * @param velocity
+     * @param angular
+     * @return
+     */
     public boolean insertColumn(String name, String uri, String master, String controller, String velocity, String angular) {
         ContentValues values = new ContentValues();
         values.put(DataBases.CreateDB.NAME, name);
@@ -48,18 +64,30 @@ public class DbOpenHelper {
         values.put(DataBases.CreateDB.ANGULAR, angular);
         Log.d("DataBase", "insert " + name + "," + uri);
         return mDB.insert(DataBases.CreateDB._TABLENAME, null, values) > 0;
-//         mDB.rawQuery("INSERT INTO "+DataBases.CreateDB._TABLENAME+" VALUES ('','"+name+"','"+uri+"');",null);
     }
 
+
+    /**
+     * Delete row
+     *
+     * @param idx
+     * @return
+     */
     public boolean deleteColumn(String idx) {
         Log.d("DataBase", "delete index " + idx);
         return mDB.delete(DataBases.CreateDB._TABLENAME, "idx=" + idx, null) > 0;
-//        mDB.rawQuery("DELETE FROM "+DataBases.CreateDB._TABLENAME+" WHERE "+DataBases.CreateDB.IDX+"="+idx+";",null);
-
     }
 
+    /**
+     * Update robot information
+     *
+     * @param idx
+     * @param name
+     * @param uri
+     * @param master
+     * @return
+     */
     public boolean updateColumn(String idx, String name, String uri, String master) {
-//        mDB.rawQuery("UPDATE "+DataBases.CreateDB._TABLENAME+" SET "+DataBases.CreateDB.NAME+"="+name+", "+DataBases.CreateDB.URI+"="+uri+" WHERE "+DataBases.CreateDB.IDX+"="+idx+";",null);
         Log.d("DataBase", "update the value" + name + "," + uri);
         ContentValues values = new ContentValues();
         values.put(DataBases.CreateDB.NAME, name);
@@ -69,9 +97,16 @@ public class DbOpenHelper {
 
     }
 
+    /**
+     * Update robot controller option
+     *
+     * @param idx
+     * @param controller
+     * @param velocity
+     * @param angular
+     * @return
+     */
     public boolean updateOption(String idx, String controller, String velocity, String angular) {
-//        mDB.rawQuery("UPDATE "+DataBases.CreateDB._TABLENAME+" SET "+DataBases.CreateDB.NAME+"="+name+", "+DataBases.CreateDB.URI+"="+uri+" WHERE "+DataBases.CreateDB.IDX+"="+idx+";",null);
-
         ContentValues values = new ContentValues();
         values.put(DataBases.CreateDB.CONTROLLER, controller);
         values.put(DataBases.CreateDB.VELOCITY, velocity);

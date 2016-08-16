@@ -27,6 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class CustomNodeMainExecutorService extends Service implements NodeMainExecutor {
 
+
     static final String ACTION_START = "com.wonikrobotics.pathfinder.mc.ros.ACTION_START_NODE_RUNNER_SERVICE";
     static final String ACTION_SHUTDOWN = "com.wonikrobotics.pathfinder.mc.ros.ACTION_SHUTDOWN_NODE_RUNNER_SERVICE";
     private static final String TAG = "NodeMainExecutorService";
@@ -41,6 +42,10 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
 
     public CustomNodeMainExecutorService() {
         super();
+        /*
+            Create new DefaultNodeMainExecutor on constructor.
+            DefaultNodeMainExecutor is on rosjava-0.2.1
+         */
         nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
         binder = new LocalBinder();
         listeners =
@@ -50,6 +55,10 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
 
     @Override
     public void onCreate() {
+        /*
+            wake lock
+            wifi lock
+         */
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         wakeLock.acquire();
@@ -134,11 +143,6 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
         super.onDestroy();
     }
 
-    @Override
-    public boolean onUnbind(Intent intent) {
-        return super.onUnbind(intent);
-    }
-
     public boolean hasMaster() {
         return rosCore != null;
     }
@@ -172,6 +176,9 @@ public class CustomNodeMainExecutorService extends Service implements NodeMainEx
 
     @Deprecated
     public void startMaster() {
+        /*
+            Start new master node on roscore.
+         */
         rosCore = RosCore.newPublic(11311);
         try {
             rosCore.start();

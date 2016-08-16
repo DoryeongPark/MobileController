@@ -8,11 +8,15 @@ import android.provider.BaseColumns;
 public final class DataBases {
 
     public static final class CreateDB implements BaseColumns {
+        public static final String _TABLENAME = "robotlist";
+        public static final String IDX = "idx";
+        /***********************************
+         * ROBOT MASTER INFORMATION
+         *********************************/
         public static final String NAME = "name";
         public static final String URI = "uri";
-        public static final String _TABLENAME = "robotlist";
         public static final String MASTER = "master";
-        public static final String IDX = "idx";
+        /***********************************ROBOT CONTROLLER OPTION*********************************/
         public static final String CONTROLLER = "controller";
         public static final String ANGULAR = "angular";
         public static final String VELOCITY = "velocity";

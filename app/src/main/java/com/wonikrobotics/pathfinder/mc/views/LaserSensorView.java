@@ -17,30 +17,48 @@ import android.view.View;
  * Created by Notebook on 2016-07-13.
  */
 public abstract class LaserSensorView extends View {
+    /***********************************
+     * View scope
+     ****************************************/
     public static final int AROUND_ROBOT = 1;
     public static final int FRONT_OF_ROBOT = 2;
+    /*********************************** Display mode ****************************************/
     public static final int FILL_INSIDE = 3;
     public static final int FILL_OUTSIDE = 4;
     public static final int POINT_CLOUD = 5;
     public static final int POINT_CLOUD_FILL_INSIDE = 6;
     public static final int POINT_CLOUD_FILL_OUTSIDE = 7;
+
+    /******************************* message from sensor *************************************/
     private sensor_msgs.LaserScan scan_msg;
-    private float max_val = 0;
-    private float width, height, radius;
-    private boolean mode = false;
-    private float old_dist = 1f;
+
+    /**************************** Paint instances for drawing **********************************/
     private Paint paint = new Paint();
     private Paint line = new Paint();
     private Paint laser = new Paint();
     private Paint point = new Paint();
-    private PointF near = null, far = null;
+
+    /***********************************
+     * private values
+     *******************************************/
+    private float max_val = 0;                      // max range to display
+    private float width, height, radius;          // canvas' width,canvas' height, radius for draw range
+    private boolean mode = false;                  // zoomin,zoomout pinch mode
+    private float old_dist = 1f;                    // value for calculate distance gap during zoomin,zoomout
+
+    private PointF near = null, far = null;         // two points for drawing line
     private OnAutoResizeChangeListener resizeChangeListener = null;
+
+    /*************************** scope & display mode & auto resizing *****************************/
     private boolean autoResizing = true;
     private int currentRange = 1;
     private int currentDisplay = 3;
 
     public LaserSensorView(Context c) {
         super(c);
+        /*
+            Paint initiate
+         */
         paint.setColor(Color.BLACK);
         paint.setTextSize(40f);
         line.setStyle(Paint.Style.STROKE);
@@ -59,9 +77,19 @@ public abstract class LaserSensorView extends View {
         this.autoResizing = tf;
     }
 
+    /**
+     *  Store new message from sensor.
+     *  This method have to be called on listener of subscriber.
+     *
+     * @param nm
+     */
     public void update(sensor_msgs.LaserScan nm) {
         if (nm != null) {
             this.scan_msg = nm;
+            /*
+                Update max_val.
+                If auto resizing mode is on, find max value from float array automatically.
+             */
             if (max_val == 0)
                 max_val = scan_msg.getRangeMax();
             if (autoResizing) {
@@ -83,6 +111,9 @@ public abstract class LaserSensorView extends View {
             if (width == 0 && height == 0) {
                 width = canvas.getWidth();
                 height = canvas.getHeight();
+                /*
+                    Initiate radius of max range.
+                 */
                 if (currentRange == AROUND_ROBOT) {
                     if (width > height)
                         radius = height / 2f;
@@ -92,6 +123,9 @@ public abstract class LaserSensorView extends View {
                     radius = width / 2f;
                 }
             }
+            /**
+             *  Draw circles on background to user can guess the value of displayed lines.
+             */
             if (currentRange == AROUND_ROBOT) {
                 canvas.drawCircle(width / 2f, height / 2f, radius * 1.0f, line);
                 canvas.drawCircle(width / 2f, height / 2f, radius * 0.8f, line);
@@ -118,14 +152,13 @@ public abstract class LaserSensorView extends View {
 
 
             float angle = scan_msg.getAngleMin();
-
             switch (currentDisplay) {
                 case FILL_INSIDE:
                     float[] lineEndPoints = new float[scan_msg.getRanges().length * 4];
                     int numEndPoints = 0;
                     for (float range : scan_msg.getRanges()) {
                         // Only process ranges which are in the valid range.
-
+                        // Draw lines from center(near) to scaled point(far) of range value
                         if (scan_msg.getRangeMin() <= range && range <= scan_msg.getRangeMax()) {
                             if (currentRange == AROUND_ROBOT) {
                                 near = new PointF(width / 2f, height / 2f);
@@ -157,6 +190,7 @@ public abstract class LaserSensorView extends View {
                     int numEndPoints2 = 0;
                     for (float range : scan_msg.getRanges()) {
                         // Only process ranges which are in the valid range.
+                        // Draw lines from scaled point(near) of range value to scaled point(far) of max value
                         if (scan_msg.getRangeMin() <= range && range <= scan_msg.getRangeMax()) {
                             far = null;
                             near = null;
@@ -187,6 +221,7 @@ public abstract class LaserSensorView extends View {
                     int numEndPoints3 = 0;
                     for (float range : scan_msg.getRanges()) {
                         // Only process ranges which are in the valid range.
+                        // Draw points at scaled point(near) of range value
                         if (scan_msg.getRangeMin() <= range && range <= scan_msg.getRangeMax()) {
                             near = null;
                             if (currentRange == AROUND_ROBOT) {
@@ -213,7 +248,7 @@ public abstract class LaserSensorView extends View {
                     int numCloudPoints = 0;
                     for (float range : scan_msg.getRanges()) {
                         // Only process ranges which are in the valid range.
-
+                        // Draw points at scaled point(far) of range value and draw lines from center(near) to scaled point(far) of range value
                         if (scan_msg.getRangeMin() <= range && range <= scan_msg.getRangeMax()) {
                             if (currentRange == AROUND_ROBOT) {
                                 near = new PointF(width / 2f, height / 2f);
@@ -251,7 +286,7 @@ public abstract class LaserSensorView extends View {
                     int numCloudPoints2 = 0;
                     for (float range : scan_msg.getRanges()) {
                         // Only process ranges which are in the valid range.
-
+                        // Draw points at scaled point(near) of range value and draw lines from scaled point(near) of range value to scaled point(far) of max value
                         if (scan_msg.getRangeMin() <= range && range <= scan_msg.getRangeMax()) {
                             far = null;
                             near = null;
@@ -304,9 +339,13 @@ public abstract class LaserSensorView extends View {
         invalidate();
     }
 
+
     public void zoomIn() {
         max_val = max_val * 0.9f;
         this.onMaxValChanged(max_val);
+        /*
+            Auto resize mode should be off
+         */
         autoResizing = false;
         if (resizeChangeListener != null)
             resizeChangeListener.onChange(autoResizing);
@@ -315,6 +354,9 @@ public abstract class LaserSensorView extends View {
     public void zoomOut() {
         max_val = max_val * 1.1f;
         this.onMaxValChanged(max_val);
+        /*
+            Auto resize mode should be off
+         */
         autoResizing = false;
         if (resizeChangeListener != null)
             resizeChangeListener.onChange(autoResizing);
@@ -328,11 +370,9 @@ public abstract class LaserSensorView extends View {
                 if (mode == true && e.getPointerCount() >= 2) {    // 핀치줌 중이면, 이미지의 거리를 계산해서 확대를 한다.
                     float dist = spacing(e);
                     if (dist - old_dist > 20) {  // zoom in
-                        max_val = max_val * 0.9f;
-                        this.onMaxValChanged(max_val);
+                        zoomIn();
                     } else if (old_dist - dist > 20) {  // zoom out
-                        max_val = max_val * 1.1f;
-                        this.onMaxValChanged(max_val);
+                        zoomOut();
                     }
                     old_dist = dist;
                 }
@@ -343,9 +383,6 @@ public abstract class LaserSensorView extends View {
                 break;
             case MotionEvent.ACTION_POINTER_DOWN: //두번째 손가락을 터치한 경우
                 mode = true;
-                autoResizing = false;
-                if (resizeChangeListener != null)
-                    resizeChangeListener.onChange(autoResizing);
                 old_dist = spacing(e);
                 break;
             case MotionEvent.ACTION_CANCEL:
@@ -367,6 +404,13 @@ public abstract class LaserSensorView extends View {
 
     public abstract void onMaxValChanged(float val);
 
+
+    /**
+     * Calculate distance between two touch points
+     *
+     * @param event
+     * @return
+     */
     private float spacing(MotionEvent event) {
         if (event.getPointerCount() >= 2) {
             float x = event.getX(0) - event.getX(1);

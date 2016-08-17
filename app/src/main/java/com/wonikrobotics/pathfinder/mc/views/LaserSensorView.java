@@ -110,21 +110,23 @@ public abstract class LaserSensorView extends View {
     @Override
     public void onDraw(Canvas canvas) {
         if (this.scan_msg != null) {
-            if (width == 0 && height == 0) {
-                width = canvas.getWidth();
-                height = canvas.getHeight();
-                /*
-                    Initiate radius of max range.
-                 */
-                if (currentRange == AROUND_ROBOT) {
-                    if (width > height)
-                        radius = height / 2f;
-                    else
-                        radius = width / 2f;
-                } else if (currentRange == FRONT_OF_ROBOT) {
+            width = canvas.getWidth();
+            height = canvas.getHeight();
+            /*
+                Initiate radius of max range.
+             */
+            if (currentRange == AROUND_ROBOT) {
+                if (width > height)
+                    radius = height / 2f;
+                else
                     radius = width / 2f;
-                }
+            } else if (currentRange == FRONT_OF_ROBOT) {
+                if (width / 2f > height)
+                    radius = height;
+                else
+                    radius = width / 2f;
             }
+
             /**
              *  Draw circles on background to user can guess the value of displayed lines.
              */
@@ -134,22 +136,22 @@ public abstract class LaserSensorView extends View {
                 canvas.drawCircle(width / 2f, height / 2f, radius * 0.6f, line);
                 canvas.drawCircle(width / 2f, height / 2f, radius * 0.4f, line);
                 canvas.drawCircle(width / 2f, height / 2f, radius * 0.2f, line);
-                canvas.drawText(Float.toString(Math.round(max_val * 10 * 1.0f) / 10f), width / 2f - (radius * 1.0f), height / 2f, paint);
-                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.8f) / 10f), width / 2f - (radius * 0.8f), height / 2f, paint);
-                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.6f) / 10f), width / 2f - (radius * 0.6f), height / 2f, paint);
-                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.4f) / 10f), width / 2f - (radius * 0.4f), height / 2f, paint);
-                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.2f) / 10f), width / 2f - (radius * 0.2f), height / 2f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 1.0f) / 10f), width / 2f - (radius * 1.0f) / 1.414f, height / 2f - (radius * 1.0f) / 1.414f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.8f) / 10f), width / 2f - (radius * 0.8f) / 1.414f, height / 2f - (radius * 0.8f) / 1.414f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.6f) / 10f), width / 2f - (radius * 0.6f) / 1.414f, height / 2f - (radius * 0.6f) / 1.414f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.4f) / 10f), width / 2f - (radius * 0.4f) / 1.414f, height / 2f - (radius * 0.4f) / 1.414f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.2f) / 10f), width / 2f - (radius * 0.2f) / 1.414f, height / 2f - (radius * 0.2f) / 1.414f, paint);
             } else if (currentRange == FRONT_OF_ROBOT) {
                 canvas.drawCircle(width / 2f, height, radius * 1.0f, line);
                 canvas.drawCircle(width / 2f, height, radius * 0.8f, line);
                 canvas.drawCircle(width / 2f, height, radius * 0.6f, line);
                 canvas.drawCircle(width / 2f, height, radius * 0.4f, line);
                 canvas.drawCircle(width / 2f, height, radius * 0.2f, line);
-                canvas.drawText(Float.toString(Math.round(max_val * 10 * 1.0f) / 10f), width / 2f, height - (radius * 1.0f), paint);
-                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.8f) / 10f), width / 2f, height - (radius * 0.8f), paint);
-                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.6f) / 10f), width / 2f, height - (radius * 0.6f), paint);
-                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.4f) / 10f), width / 2f, height - (radius * 0.4f), paint);
-                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.2f) / 10f), width / 2f, height - (radius * 0.2f), paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 1.0f) / 10f), width / 2f - (radius * 1.0f) / 1.414f, height - (radius * 1.0f) / 1.414f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.8f) / 10f), width / 2f - (radius * 0.8f) / 1.414f, height - (radius * 0.8f) / 1.414f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.6f) / 10f), width / 2f - (radius * 0.6f) / 1.414f, height - (radius * 0.6f) / 1.414f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.4f) / 10f), width / 2f - (radius * 0.4f) / 1.414f, height - (radius * 0.4f) / 1.414f, paint);
+                canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.2f) / 10f), width / 2f - (radius * 0.2f) / 1.414f, height - (radius * 0.2f) / 1.414f, paint);
             }
 
 

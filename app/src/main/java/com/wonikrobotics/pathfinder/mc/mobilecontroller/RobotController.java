@@ -271,8 +271,9 @@ public class RobotController extends CustomRosActivity {
                                                 finish();
                                             }
                                         });
+                                        if(cTimer!= null)
+                                            cTimer.shutDown();
                                         builder.setMessage("Check the network state");
-
                                         builder.create();
                                         builder.show();
                                     } catch (Exception e) {
@@ -580,7 +581,7 @@ public class RobotController extends CustomRosActivity {
         RelativeLayout.LayoutParams outparams = new RelativeLayout.LayoutParams(scroll.getWidth() / 4, scroll.getWidth() / 4);
         outparams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         outparams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-        sonarzoomout.setLayoutParams(outparams);                        // set mearsure of zoomout image
+        sonarzoomout.setLayoutParams(outparams);                        // set measure of zoomout image
         sonarzoomin.setOnClickListener(zoom);
         sonarzoomout.setOnClickListener(zoom);
 
@@ -924,8 +925,24 @@ public class RobotController extends CustomRosActivity {
                 veloPubData.getLinear().setY(1.0f);
                 publisher.publish(veloPubData);
             }
-        };
 
+            @Override
+            public void onMasterRegistrationSuccess(Object o) {
+                super.onMasterRegistrationSuccess(o);
+                // Start heartbeat
+                if (!getIs_Master()) {
+                    if (cTimer == null) {
+                        cTimer = new ConnectionTimer(10) {
+                            @Override
+                            public void onTimerFinished() {
+                                RobotController.this.onTimerFinished();
+                            }
+                        };
+                        cTimer.start();
+                    }
+                }
+            }
+        };
         androidNode.addPublisher(velocityPublisher);
 
 
@@ -992,18 +1009,7 @@ public class RobotController extends CustomRosActivity {
         // Node start
         nodeMainExecutor.execute(androidNode, nodeConfiguration);
 
-        // Start heartbeat
-        if (!getIs_Master()) {
-            if (cTimer == null) {
-                cTimer = new ConnectionTimer(10) {
-                    @Override
-                    public void onTimerFinished() {
-                        RobotController.this.onTimerFinished();
-                    }
-                };
-                cTimer.start();
-            }
-        }
+
     }
 
 }

@@ -177,8 +177,8 @@ public class SonarSensorView extends View {
              *  Draw scaled arc
              */
             for (int i = 0; i < minAngle.length; i++) {
-                float gapX = cX * (valuelist[i] / max_val);
-                float gapY = cY * (valuelist[i] / max_val);
+                float gapX = radius * (valuelist[i] / max_val);
+                float gapY = radius * (valuelist[i] / max_val);
                 RectF aroundRect;
                 if (scale_mode == BEHIND_OF_ROBOT) {
                     aroundRect = new RectF(cX - gapX, -gapY, cX + gapX, gapY);

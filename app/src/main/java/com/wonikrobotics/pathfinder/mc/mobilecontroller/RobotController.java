@@ -414,7 +414,7 @@ public class RobotController extends CustomRosActivity {
         for (int i = 0; i < 8; ++i) {
             sonarValues[i] = 0.0f;
             sonarMinAngle[i] = 194 + 19 * i;
-            sonarMinAngle[i] = 14 + 19 * i;
+//            sonarMinAngle[i] = 14 + 19 * i
             sonarDrawAngle[i] = 19;
         }
     }

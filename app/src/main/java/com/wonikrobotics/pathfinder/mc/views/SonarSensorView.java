@@ -135,11 +135,11 @@ public class SonarSensorView extends View {
                     canvas.drawCircle(cX, cY, radius * 0.6f, line);
                     canvas.drawCircle(cX, cY, radius * 0.4f, line);
                     canvas.drawCircle(cX, cY, radius * 0.2f, line);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 1.0f) / 10f), cX - (radius * 1.0f), cY, word);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.8f) / 10f), cX - (radius * 0.8f), cY, word);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.6f) / 10f), cX - (radius * 0.6f), cY, word);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.4f) / 10f), cX - (radius * 0.4f), cY, word);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.2f) / 10f), cX - (radius * 0.2f), cY, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 1.0f) / 10f), cX - (radius * 1.0f) / 1.414f, cY - (radius * 1.0f) / 1.414f, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.8f) / 10f), cX - (radius * 0.8f) / 1.414f, cY - (radius * 0.8f) / 1.414f, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.6f) / 10f), cX - (radius * 0.6f) / 1.414f, cY - (radius * 0.6f) / 1.414f, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.4f) / 10f), cX - (radius * 0.4f) / 1.414f, cY - (radius * 0.4f) / 1.414f, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.2f) / 10f), cX - (radius * 0.2f) / 1.414f, cY - (radius * 0.2f) / 1.414f, word);
                     break;
                 case FRONT_OF_ROBOT:
                     cX = canvas.getWidth() / 2;
@@ -150,11 +150,11 @@ public class SonarSensorView extends View {
                     canvas.drawCircle(cX, cY, radius * 0.6f, line);
                     canvas.drawCircle(cX, cY, radius * 0.4f, line);
                     canvas.drawCircle(cX, cY, radius * 0.2f, line);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 1.0f) / 10f), cX, cY - (radius * 1.0f), word);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.8f) / 10f), cX, cY - (radius * 0.8f), word);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.6f) / 10f), cX, cY - (radius * 0.6f), word);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.4f) / 10f), cX, cY - (radius * 0.4f), word);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.2f) / 10f), cX, cY - (radius * 0.2f), word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 1.0f) / 10f), cX - (radius * 1.0f) / 1.414f, cY - (radius * 1.0f) / 1.414f, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.8f) / 10f), cX - (radius * 0.8f) / 1.414f, cY - (radius * 0.8f) / 1.414f, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.6f) / 10f), cX - (radius * 0.6f) / 1.414f, cY - (radius * 0.6f) / 1.414f, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.4f) / 10f), cX - (radius * 0.4f) / 1.414f, cY - (radius * 0.4f) / 1.414f, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.2f) / 10f), cX - (radius * 0.2f) / 1.414f, cY - (radius * 0.2f) / 1.414f, word);
                     break;
                 case BEHIND_OF_ROBOT:
                     cX = canvas.getWidth() / 2;
@@ -166,19 +166,19 @@ public class SonarSensorView extends View {
                     canvas.drawCircle(cX, 0, radius * 0.6f, line);
                     canvas.drawCircle(cX, 0, radius * 0.4f, line);
                     canvas.drawCircle(cX, 0, radius * 0.2f, line);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 1.0f) / 10f), cX, (radius * 1.0f), word);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.8f) / 10f), cX, (radius * 0.8f), word);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.6f) / 10f), cX, (radius * 0.6f), word);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.4f) / 10f), cX, (radius * 0.4f), word);
-                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.2f) / 10f), cX, (radius * 0.2f), word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 1.0f) / 10f), cX - (radius * 1.0f) / 1.414f, (radius * 1.0f) / 1.414f, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.8f) / 10f), cX - (radius * 0.8f) / 1.414f, (radius * 0.8f) / 1.414f, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.6f) / 10f), cX - (radius * 0.6f) / 1.414f, (radius * 0.6f) / 1.414f, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.4f) / 10f), cX - (radius * 0.4f) / 1.414f, (radius * 0.4f) / 1.414f, word);
+                    canvas.drawText(Float.toString(Math.round(max_val * 10 * 0.2f) / 10f), cX - (radius * 0.2f) / 1.414f, (radius * 0.2f) / 1.414f, word);
                     break;
             }
             /**
              *  Draw scaled arc
              */
             for (int i = 0; i < minAngle.length; i++) {
-                float gapX = cX * (valuelist[i] / max_val);
-                float gapY = cY * (valuelist[i] / max_val);
+                float gapX = radius * (valuelist[i] / max_val);
+                float gapY = radius * (valuelist[i] / max_val);
                 RectF aroundRect;
                 if (scale_mode == BEHIND_OF_ROBOT) {
                     aroundRect = new RectF(cX - gapX, -gapY, cX + gapX, gapY);

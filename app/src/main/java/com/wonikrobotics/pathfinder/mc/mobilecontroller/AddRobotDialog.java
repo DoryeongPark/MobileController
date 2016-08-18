@@ -18,7 +18,7 @@ import android.widget.Switch;
  * @desription Dialog for registering new robot
  */
 public class AddRobotDialog extends Activity implements View.OnClickListener {
-    private Button register, cancel;
+    private Button register, cancel, QRCode;
     private EditText name, uri;
     private Switch master;
     private String master_checked = "false";
@@ -32,6 +32,7 @@ public class AddRobotDialog extends Activity implements View.OnClickListener {
         name = (EditText) findViewById(R.id.register_robotname);
         uri = (EditText) findViewById(R.id.register_roboturi);
         master = (Switch) findViewById(R.id.master_switch);
+        QRCode = (Button) findViewById(R.id.btn_QRCode);
 
         // master switch change listener
 
@@ -43,6 +44,7 @@ public class AddRobotDialog extends Activity implements View.OnClickListener {
         });
         register.setOnClickListener(this);
         cancel.setOnClickListener(this);
+        QRCode.setOnClickListener(this);
     }
 
     @Override
@@ -66,6 +68,23 @@ public class AddRobotDialog extends Activity implements View.OnClickListener {
                 setResult(-1);
                 finish();
                 break;
+            case R.id.btn_QRCode:
+                Intent qrintent = new Intent("com.google.zxing.client.android.SCAN");
+                qrintent.putExtra("SCAN_MODE", "ALL");
+                startActivityForResult(qrintent, 2);
+                break;
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+        if (requestCode == 2) {
+            if (resultCode == Activity.RESULT_OK) {
+                String content = intent.getStringExtra("SCAN_RESULT");
+                uri.setText(content);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, intent);
     }
 }

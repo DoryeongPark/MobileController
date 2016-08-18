@@ -426,8 +426,8 @@ public abstract class LaserSensorView extends View {
 
     }
 
-    public static abstract class OnAutoResizeChangeListener {
-        public abstract void onChange(boolean onOff);
+    public interface OnAutoResizeChangeListener {
+        void onChange(boolean onOff);
     }
 
 }

@@ -747,6 +747,7 @@ public class RobotController extends CustomRosActivity {
                                 @Override
                                 public void onProgressChanged(int progress, boolean fromUser) {
                                     velocity = progress == 0 ? 0 : -1 * progress / 100f;
+                                    velocity = velocity * velSensitive;
                                     velocityDisplayer.setVel(Math.abs(progress));
                                 }
                             });
@@ -756,6 +757,7 @@ public class RobotController extends CustomRosActivity {
                                 @Override
                                 public void onAngleChanged(int angle, boolean fromUser) {
                                     angular = angle == 0 ? 0 : angle / -180f;
+                                    angular = angular * angSensitive;
                                 }
                             });
                         } else {
@@ -764,8 +766,8 @@ public class RobotController extends CustomRosActivity {
                             final VelocityCalculator cal = new VelocityCalculator() {
                                 @Override
                                 public void valueChangeListener(float velocity, float angular) {
-                                    RobotController.this.velocity = -1 * velocity;
-                                    RobotController.this.angular = angular;
+                                    RobotController.this.velocity = -1 * velocity * velSensitive;
+                                    RobotController.this.angular = angular * angSensitive;
                                     velocityDisplayer.setVel(Math.abs(Math.round(velocity * 100)));
                                 }
                             };

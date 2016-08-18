@@ -47,7 +47,7 @@ public class SelectRobot extends Activity {
             }
         }
     };
-    private ImageView addRobot, delRobot, modRobot;
+    private ImageView addRobot, delRobot, modRobot, QRCode;
     /// listener for addRobot,deleteRobot,modifyRobot
     private View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
@@ -124,6 +124,11 @@ public class SelectRobot extends Activity {
                         Toast.makeText(SelectRobot.this, "Please select the robot", Toast.LENGTH_SHORT).show();
                     }
                     break;
+                case R.id.btn_QRCode:
+                    Intent qrintent = new Intent("com.google.zxing.client.android.SCAN");
+                    qrintent.putExtra("SCAN_MODE", "ALL");
+                    startActivityForResult(qrintent, 3);
+                    break;
             }
         }
     };
@@ -138,6 +143,7 @@ public class SelectRobot extends Activity {
         addRobot = (ImageView) findViewById(R.id.select_robot_add);
         delRobot = (ImageView) findViewById(R.id.select_robot_del);
         modRobot = (ImageView) findViewById(R.id.select_robot_mod);
+        QRCode = (ImageView) findViewById(R.id.btn_QRCode);
         robotName = (TextView) findViewById(R.id.robot_name);
         robotURL = (TextView) findViewById(R.id.robot_url);
         robotInfo = (TextView) findViewById(R.id.robot_info);
@@ -145,8 +151,10 @@ public class SelectRobot extends Activity {
         addRobot.setOnClickListener(clickListener);
         delRobot.setOnClickListener(clickListener);
         modRobot.setOnClickListener(clickListener);
+        QRCode.setOnClickListener(clickListener);
         availableRobotList.setOnItemClickListener(robotListListener);
         btnConnect.setOnClickListener(clickListener);
+
     }
 
     @Override
@@ -204,28 +212,54 @@ public class SelectRobot extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (resultCode == 1) {
+        if (requestCode == 1) {
+            if (resultCode == 1) {
 
-            // callback on finish of AddRobotDialog. Insert values into DB
+                // callback on finish of AddRobotDialog. Insert values into DB
 
-            if (mDbOpenHelper == null) {
-                mDbOpenHelper = new DbOpenHelper(SelectRobot.this);
+                if (mDbOpenHelper == null) {
+                    mDbOpenHelper = new DbOpenHelper(SelectRobot.this);
+                }
+                mDbOpenHelper.open();
+                mDbOpenHelper.insertColumn(intent.getStringExtra("name"), intent.getStringExtra("uri"), intent.getStringExtra("master"), "1", "1.0", "1.0");
+                Toast.makeText(SelectRobot.this, "New robot registering is success", Toast.LENGTH_SHORT).show();
+                robotListDataLoad();
             }
-            mDbOpenHelper.open();
-            mDbOpenHelper.insertColumn(intent.getStringExtra("name"), intent.getStringExtra("uri"), intent.getStringExtra("master"), "1", "1.0", "1.0");
-            Toast.makeText(SelectRobot.this, "New robot registering is success", Toast.LENGTH_SHORT).show();
-            robotListDataLoad();
-        } else if (resultCode == 2) {
+        }
+        if (requestCode == 2) {
+            if (resultCode == 2) {
 
-            // callback on finich of RobotModifyDialog. Update values of DB
+                // callback on finich of RobotModifyDialog. Update values of DB
 
-            if (mDbOpenHelper == null) {
-                mDbOpenHelper = new DbOpenHelper(SelectRobot.this);
+                if (mDbOpenHelper == null) {
+                    mDbOpenHelper = new DbOpenHelper(SelectRobot.this);
+                }
+                mDbOpenHelper.open();
+                mDbOpenHelper.updateColumn(Integer.toString(intent.getIntExtra("idx", -1)), intent.getStringExtra("name"), intent.getStringExtra("uri"), intent.getStringExtra("master"));
+                Toast.makeText(SelectRobot.this, "Update robot information is success", Toast.LENGTH_SHORT).show();
+                robotListDataLoad();
             }
-            mDbOpenHelper.open();
-            mDbOpenHelper.updateColumn(Integer.toString(intent.getIntExtra("idx", -1)), intent.getStringExtra("name"), intent.getStringExtra("uri"), intent.getStringExtra("master"));
-            Toast.makeText(SelectRobot.this, "Update robot information is success", Toast.LENGTH_SHORT).show();
-            robotListDataLoad();
+        }
+        if (requestCode == 3) {
+            if (resultCode == Activity.RESULT_OK) {
+                String content = intent.getStringExtra("SCAN_RESULT");
+                String[] spt = content.split("@");
+                // callback on finish of AddRobotDialog. Insert values into DB
+
+                if (mDbOpenHelper == null) {
+                    mDbOpenHelper = new DbOpenHelper(SelectRobot.this);
+                }
+                mDbOpenHelper.open();
+                mDbOpenHelper.insertColumn(spt[0], spt[1], "false", "1", "1.0", "1.0");
+                Intent controlActivity = new Intent(SelectRobot.this, RobotController.class);
+                controlActivity.putExtra("NAME", spt[0]);
+                controlActivity.putExtra("URL", spt[1]);
+                controlActivity.putExtra("MASTER", false);
+                if (mDbOpenHelper.getIdx(spt[1]) != -1) {
+                    controlActivity.putExtra("IDX", mDbOpenHelper.getIdx(spt[1]));
+                    startActivity(controlActivity);
+                }
+            }
         }
     }
 }

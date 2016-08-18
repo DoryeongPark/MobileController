@@ -55,6 +55,8 @@ public class DbOpenHelper {
      * @return
      */
     public boolean insertColumn(String name, String uri, String master, String controller, String velocity, String angular) {
+        if (getIdx(uri) == -1)
+            return false;
         ContentValues values = new ContentValues();
         values.put(DataBases.CreateDB.NAME, name);
         values.put(DataBases.CreateDB.URI, uri);
@@ -66,6 +68,14 @@ public class DbOpenHelper {
         return mDB.insert(DataBases.CreateDB._TABLENAME, null, values) > 0;
     }
 
+    public int getIdx(String uri) {
+        Cursor c = mDB.rawQuery("SELECT " + DataBases.CreateDB.IDX + " FROM " + DataBases.CreateDB._TABLENAME
+                + " WHERE " + DataBases.CreateDB.URI + "='" + uri + "';", null);
+        if (c.moveToNext()) {
+            return c.getInt(c.getColumnIndex(DataBases.CreateDB.IDX));
+        }
+        return -1;
+    }
 
     /**
      * Delete row

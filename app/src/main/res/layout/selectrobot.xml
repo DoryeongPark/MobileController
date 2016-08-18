@@ -44,10 +44,13 @@
                 android:textColor="#ffffff"
                 android:textSize="10pt" />
 
-            <View
+            <ImageView
+                android:id="@+id/btn_QRCode"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:scaleType="fitCenter"
+                android:src="@drawable/qrcode" />
             <ImageView
                 android:id="@+id/select_robot_add"
                 android:layout_width="0px"
